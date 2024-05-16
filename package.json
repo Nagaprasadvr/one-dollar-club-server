@@ -1,12 +1,12 @@
 {
   "name": "one-dollar-club-server",
-  "module": "server.ts",
+  "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun server.ts",
-    "build": "tsc",
+    "dev": "bun index.ts",
+    "build": "bun build ./index.ts --target node --outdir ./build",
     "ts-build": "tsc --outdir ./build",
-    "start": "bun ./build/server.js",
+    "start": "bun ./build/index.js",
     "vercel-build": "echo vercel build"
   },
   "devDependencies": {
