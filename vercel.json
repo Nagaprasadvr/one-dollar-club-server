@@ -1,16 +1,8 @@
 {
-  "version": 2,
-  "name": "one-dollar-club-server",
-  "builds": [
+  "rewrites": [
     {
-      "src": "./build/server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/build/server.js"
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
