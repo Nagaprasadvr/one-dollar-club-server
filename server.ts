@@ -116,13 +116,11 @@ try {
 console.log("Server running on port 4000");
 
 const startPoolConfigJob = cron.schedule("0 0 * * *", () => {
-  // Your task logic here
   console.log("Job executed at midnight UTC.");
   poolId = generatePoolId();
 });
 
 const endPoolConfigJob = cron.schedule("0 23 * * *", () => {
-  // Your task logic here
   console.log("Job executed at 23:00 UTC.");
 });
 
