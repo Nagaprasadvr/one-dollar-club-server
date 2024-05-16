@@ -1,0 +1,24 @@
+{
+  "name": "one-dollar-club-server",
+  "module": "server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.30.0",
+    "@solana/web3.js": "^1.91.8",
+    "@types/dotenv": "^8.2.0",
+    "@types/mongoose": "^5.11.97",
+    "@types/node-cron": "^3.0.11",
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.3.4",
+    "node-cron": "^3.0.3"
+  }
+}
