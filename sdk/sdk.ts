@@ -10,7 +10,6 @@ import {
   IDL as OneDollarClubIdl,
 } from "./one_dollar_club";
 import { Connection, PublicKey, type ConfirmOptions } from "@solana/web3.js";
-import type { IdlAccount } from "@coral-xyz/anchor/dist/cjs/idl";
 
 export const PROGRAM_ID = new PublicKey(
   "HaebyXgGqUgGLQkY93CTm8iEC6gBjH1NU3Zgr7EG4wNW"

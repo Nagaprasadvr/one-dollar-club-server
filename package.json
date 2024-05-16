@@ -3,7 +3,9 @@
   "module": "server.ts",
   "type": "module",
   "scripts": {
-    "start": "bun server.ts"
+    "dev": "bun server.ts",
+    "build": "bun build ./server.ts --target node --outdir ./build",
+    "start": "bun ./build/server.js"
   },
   "devDependencies": {
     "@types/bun": "latest"

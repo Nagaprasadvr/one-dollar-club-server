@@ -1,5 +1,5 @@
-import type { Wallet } from "@coral-xyz/anchor";
-import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import { Wallet } from "@coral-xyz/anchor";
+
 import type { Keypair } from "@solana/web3.js";
 
 export const getRouteEndpoint = (url: string): string => {
@@ -27,7 +27,7 @@ export const getQueryParams = (url: string): Record<string, string> => {
 };
 
 export const getWalletFromKeyPair = (keypair: Keypair): Wallet => {
-  return new NodeWallet(keypair);
+  return new Wallet(keypair);
 };
 
 export const generatePoolId = (): string => {
