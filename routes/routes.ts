@@ -147,9 +147,9 @@ export const handlePostCreatePosition = async (
     }
 
     const depositsCollection = await db.collection<Deposits>("deposits");
-    console.log("pubkey", pubkey);
     const entryExists = await depositsCollection.findOne({
       pubkey,
+      poolId,
     });
     if (!entryExists) {
       return Response.json(
@@ -159,7 +159,7 @@ export const handlePostCreatePosition = async (
     }
 
     const pointsCollection = await db.collection<Points>("points");
-    const points = await pointsCollection.findOne({ pubkey });
+    const points = await pointsCollection.findOne({ pubkey, poolId });
     if (!points) {
       return Response.json({ error: "No points found" }, { status: 404 });
     }
@@ -177,6 +177,8 @@ export const handlePostCreatePosition = async (
     const positionExists = await positionCollection.findOne({
       tokenName,
       tokenMint,
+      pubkey,
+      poolId,
     });
     if (positionExists) {
       return Response.json(
@@ -231,7 +233,7 @@ export const handleGetPositions = async (pubkey: string) => {
     const positions = await positionCollection.find({ pubkey }).toArray();
 
     if (positions.length === 0) {
-      return Response.json({ error: "No positions found" }, { status: 404 });
+      return Response.json({ error: "No positions found" }, { status: 200 });
     }
     return Response.json({ data: positions }, { status: 200 });
   } catch (e) {
