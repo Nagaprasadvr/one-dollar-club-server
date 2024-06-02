@@ -7,6 +7,7 @@ export type Urls =
   | "/poolCreatePosition"
   | "/poolServerId"
   | "/isAllowedToPlay"
-  | "/poolPoints";
+  | "/poolPoints"
+  | "/poolCreatePositions";
 
 export type RequestMethods = "GET" | "POST" | "PUT" | "DELETE";

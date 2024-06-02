@@ -21,6 +21,7 @@ import {
   handleIsAllowedToPlay,
   handlePoolConfigRoute,
   handlePostCreatePosition,
+  handlePostCreatePositions,
   handlePostPoolDeposit,
 } from "./routes/routes";
 import express from "express";
@@ -38,6 +39,7 @@ const urls: Urls[] = [
   "/poolServerId",
   "/isAllowedToPlay",
   "/poolPoints",
+  "/poolCreatePositions",
 ];
 
 const CORS_HEADERS = {
@@ -48,7 +50,7 @@ const CORS_HEADERS = {
   },
 };
 
-let poolId = "adhnkdhs";
+let poolId = "676gjjgufyfyudtyduy";
 console.log("Pool ID", poolId);
 const homeDir = os.homedir();
 
@@ -185,24 +187,24 @@ const handleRoutes = async (
       );
 
     case "/poolCreatePosition":
-      const reqJson = await req.json();
-      if (!reqJson) {
+      const reqJson1 = await req.json();
+      if (!reqJson1) {
         return Response.json({ error: "No body" }, { status: 400 });
       }
-      if (!reqJson?.position || typeof reqJson?.position !== "object") {
+      if (!reqJson1?.position || typeof reqJson1?.position !== "object") {
         return Response.json(
           { error: "No position object passed" },
           { status: 400 }
         );
       }
-      return await handlePostCreatePosition(reqJson?.position, poolId);
+      return await handlePostCreatePosition(reqJson1?.position, poolId);
 
     case "/poolGetPositions":
       pubkey = queryParams?.pubkey;
       if (!pubkey) {
         return Response.json({ error: "No pubkey" }, { status: 400 });
       }
-      return await handleGetPositions(String(pubkey));
+      return await handleGetPositions(String(pubkey), poolId);
 
     case "/poolServerId":
       return Response.json(
@@ -225,5 +227,19 @@ const handleRoutes = async (
         return Response.json({ error: "No pubkey" }, { status: 400 });
       }
       return await handleGetPoints(String(pubkey), poolId);
+
+    case "/poolCreatePositions":
+      const reqJson = await req.json();
+      if (!reqJson) {
+        return Response.json({ error: "No body" }, { status: 400 });
+      }
+      pubkey = reqJson?.pubkey;
+      if (!pubkey) {
+        return Response.json({ error: "No pubkey" }, { status: 400 });
+      }
+      if (!reqJson?.positions || reqJson?.positions?.length === 0) {
+        return Response.json({ error: "No positions passed" }, { status: 400 });
+      }
+      return await handlePostCreatePositions(reqJson.positions, poolId, pubkey);
   }
 };

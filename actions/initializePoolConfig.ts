@@ -15,7 +15,6 @@ export const initializePoolConfig = async (
 ) => {
   try {
     console.log("Initializing pool config");
-    console.log("connection", sdk.connection);
     const programAd = await sdk.connection.getAccountInfo(
       sdk.program.programId
     );

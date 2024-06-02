@@ -39,6 +39,7 @@ export const handlePostPoolDeposit = async (pubkey: string, poolId: string) => {
     const currentTsInSeconds = Math.floor(Date.now() / 1000);
     const entryAlreadyExists = await depositsCollection.findOne({
       pubkey,
+      poolId,
     });
     if (entryAlreadyExists) {
       return Response.json({ error: "Entry already Exists" }, { status: 400 });
@@ -204,7 +205,7 @@ export const handlePostCreatePosition = async (
     };
     await positionCollection.insertOne(poistion);
     await pointsCollection.updateOne(
-      { pubkey },
+      { pubkey, poolId },
       {
         $set: {
           pointsRemaining: points.pointsRemaining - pointsAllocated,
@@ -227,13 +228,171 @@ export const handlePostCreatePosition = async (
   }
 };
 
-export const handleGetPositions = async (pubkey: string) => {
+export const handlePostCreatePositions = async (
+  positions: Array<PositionWithoutPoolId>,
+  poolId: string,
+  pubkey: string
+) => {
+  try {
+    const validPositions: Position[] = [];
+    const totalPointsAllocated: number[] = [];
+    const depositsCollection = await db.collection<Deposits>("deposits");
+    const entryExists = await depositsCollection.findOne({
+      pubkey,
+      poolId,
+    });
+    if (!entryExists) {
+      return Response.json(
+        {
+          error: "No deposit found , cant create position if not deposited",
+        },
+        { status: 404 }
+      );
+    }
+    const pointsCollection = await db.collection<Points>("points");
+    const points = await pointsCollection.findOne({
+      pubkey,
+      poolId,
+    });
+    if (!points) {
+      return Response.json({ message: "No points found" }, { status: 200 });
+    }
+    if (!positions || positions.length === 0) {
+      return Response.json({ message: "No positions passed" }, { status: 200 });
+    }
+
+    for (const position of positions) {
+      const {
+        pubkey,
+        tokenName,
+        tokenMint,
+        entryPrice,
+        leverage,
+        pointsAllocated,
+        positionType,
+        liquidationPrice,
+      } = position;
+
+      if (
+        !pubkey ||
+        !tokenName ||
+        !tokenMint ||
+        !entryPrice ||
+        !leverage ||
+        !pointsAllocated ||
+        !positionType ||
+        !liquidationPrice
+      ) {
+        return Response.json({ error: "Missing fields" }, { status: 400 });
+      }
+
+      if (pointsAllocated <= 0) {
+        return Response.json(
+          { error: "Points allocated should be greater than 0" },
+          { status: 400 }
+        );
+      }
+
+      if (leverage <= 0) {
+        return Response.json(
+          { error: "Leverage should be greater than 0" },
+          { status: 400 }
+        );
+      }
+
+      const validPubkey = PublicKey.isOnCurve(pubkey);
+      if (!validPubkey) {
+        return Response.json({ error: "Invalid pubkey" }, { status: 400 });
+      }
+
+      const pointsCollection = await db.collection<Points>("points");
+      const points = await pointsCollection.findOne({ pubkey, poolId });
+      if (!points) {
+        return Response.json({ error: "No points found" }, { status: 404 });
+      }
+
+      if (points.pointsRemaining < pointsAllocated) {
+        return Response.json(
+          {
+            error: "Insufficient points",
+          },
+          { status: 400 }
+        );
+      }
+
+      const positionCollection = await db.collection<Position>("position");
+      const positionExists = await positionCollection.findOne({
+        tokenName,
+        tokenMint,
+        pubkey,
+        poolId,
+      });
+      if (positionExists) {
+        return Response.json(
+          {
+            error: "Position already exists",
+          },
+          { status: 400 }
+        );
+      }
+      totalPointsAllocated.push(pointsAllocated);
+      validPositions.push({
+        pubkey,
+        timeStamp: Math.floor(Date.now() / 1000),
+        tokenName,
+        tokenMint,
+        entryPrice,
+        leverage,
+        pointsAllocated,
+        poolId,
+        positionType,
+        liquidationPrice,
+      });
+    }
+
+    const positionCollection = await db.collection<Position>("position");
+    await positionCollection.insertMany(validPositions);
+    const totalPoints = totalPointsAllocated.reduce((a, b) => a + b, 0);
+    if (totalPoints > points.pointsRemaining) {
+      return Response.json(
+        {
+          error: "Insufficient points",
+        },
+        { status: 400 }
+      );
+    }
+    await pointsCollection.updateOne(
+      { pubkey, poolId },
+      {
+        $set: {
+          pointsRemaining: points.pointsRemaining - totalPoints,
+        },
+      }
+    );
+    return Response.json(
+      {
+        message: `Positions created successfully for ${pubkey}`,
+      },
+      { status: 200 }
+    );
+  } catch (e) {
+    console.log("error", e);
+    return Response.json(
+      { error: "Error in creating position" },
+      { status: 500 }
+    );
+  }
+};
+
+export const handleGetPositions = async (pubkey: string, poolId: string) => {
   try {
     const positionCollection = await db.collection<Position>("position");
-    const positions = await positionCollection.find({ pubkey }).toArray();
+    const positions = await positionCollection
+      .find({ pubkey, poolId })
+      .toArray();
 
     if (positions.length === 0) {
-      return Response.json({ error: "No positions found" }, { status: 200 });
+      return Response.json({ message: "No positions found" }, { status: 200 });
     }
     return Response.json({ data: positions }, { status: 200 });
   } catch (e) {
@@ -265,7 +424,7 @@ export const handleGetPoints = async (pubkey: string, poolId: string) => {
     const pointsCollection = await db.collection<Points>("points");
     const points = await pointsCollection.findOne({ pubkey, poolId });
     if (!points) {
-      return Response.json({ error: "No points found" }, { status: 404 });
+      return Response.json({ message: "No points found" }, { status: 200 });
     }
     return Response.json({ data: points.pointsRemaining }, { status: 200 });
   } catch (e) {
