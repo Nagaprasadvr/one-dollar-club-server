@@ -45,7 +45,7 @@ const urls: Urls[] = [
 const CORS_HEADERS = {
   headers: {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "OPTIONS, POST",
+    "Access-Control-Allow-Methods": "OPTIONS, POST,GET",
     "Access-Control-Allow-Headers": "Content-Type",
   },
 };
