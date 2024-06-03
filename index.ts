@@ -75,7 +75,7 @@ const poolConfigAddress = new PublicKey(
 );
 
 const server = Bun.serve({
-  port: 443,
+  port: 80,
   fetch: async (req, server) => {
     if (req.method === "OPTIONS") {
       const res = new Response("Departed", CORS_HEADERS);
