@@ -1,4 +1,4 @@
-import type { Server } from "bun";
+import { serve, type Server } from "bun";
 import * as cron from "node-cron";
 import type { RequestMethods, Urls } from "./utils/types";
 import {
@@ -74,44 +74,40 @@ const poolConfigAddress = new PublicKey(
   "3ZsiWpKCoADMkz9w72A78Z6c6NnAoqwyDyQk1puMXPHe"
 );
 
-try {
-  const server = Bun.serve({
-    port: 4000,
-    fetch: async (req, server) => {
-      if (req.method === "OPTIONS") {
-        const res = new Response("Departed", CORS_HEADERS);
-        return res;
-      }
-      if (server.upgrade(req)) return;
-      const res = await handleRoutes(req, server);
-      const response = new Response(res.body, {
-        status: res.status,
-        headers: {
-          "Content-Type": "application/json",
-          ...CORS_HEADERS.headers,
-        },
-      });
-      return response;
-    },
+const server = Bun.serve({
+  port: 4000,
+  fetch: async (req, server) => {
+    if (req.method === "OPTIONS") {
+      const res = new Response("Departed", CORS_HEADERS);
+      return res;
+    }
+    if (server.upgrade(req)) return;
+    const res = await handleRoutes(req, server);
+    const response = new Response(res.body, {
+      status: res.status,
+      headers: {
+        "Content-Type": "application/json",
+        ...CORS_HEADERS.headers,
+      },
+    });
+    return response;
+  },
 
-    websocket: {
-      message: (ws) => {
-        console.log(ws.data);
-      },
-      open: (ws) => {
-        ws.send("Hello world");
-      },
-      close: (ws) => {
-        ws.send("Goodbye world");
-      },
-      drain: (ws) => {
-        console.log("Drain");
-      },
+  websocket: {
+    message: (ws) => {
+      console.log(ws.data);
     },
-  });
-} catch (e) {
-  console.log(e);
-}
+    open: (ws) => {
+      ws.send("Hello world");
+    },
+    close: (ws) => {
+      ws.send("Goodbye world");
+    },
+    drain: (ws) => {
+      console.log("Drain");
+    },
+  },
+});
 
 let poolConfigAccount: PoolConfig;
 try {
@@ -120,7 +116,7 @@ try {
   console.log("error");
 }
 
-console.log("Server running on port" + "4000");
+console.log("Server running on port" + " " + server.port);
 
 const startPoolConfigJob = cron.schedule("0 0 * * *", () => {
   console.log("Job executed at midnight UTC.");
