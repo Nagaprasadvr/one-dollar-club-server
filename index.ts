@@ -93,10 +93,6 @@ try {
       });
       return response;
     },
-    tls: {
-      cert: Bun.file(path.join(__dirname, "cert", "cert.pem")),
-      key: Bun.file(path.join(__dirname, "cert", "key.pem")),
-    },
 
     websocket: {
       message: (ws) => {
