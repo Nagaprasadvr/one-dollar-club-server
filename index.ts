@@ -75,7 +75,7 @@ const poolConfigAddress = new PublicKey(
 );
 
 const server = Bun.serve({
-  port: 4000,
+  port: 443,
   fetch: async (req, server) => {
     if (req.method === "OPTIONS") {
       const res = new Response("Departed", CORS_HEADERS);
@@ -91,6 +91,10 @@ const server = Bun.serve({
       },
     });
     return response;
+  },
+  tls: {
+    cert: "/etc/letsencrypt/live/onedollarclub.fun/fullchain.pem",
+    key: "/etc/letsencrypt/live/onedollarclub.fun/privkey.pem",
   },
 
   websocket: {
@@ -116,7 +120,7 @@ try {
   console.log("error");
 }
 
-console.log("Server running on port 4000");
+console.log("Server running on port" + server.port);
 
 const startPoolConfigJob = cron.schedule("0 0 * * *", () => {
   console.log("Job executed at midnight UTC.");
