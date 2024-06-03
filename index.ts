@@ -93,7 +93,7 @@ const server = Bun.serve({
     return response;
   },
   tls: {
-    cert: "/etc/letsencrypt/live/onedollarclub.fun/cert.pem",
+    cert: "/etc/letsencrypt/live/onedollarclub.fun/fullchain.pem",
     key: "/etc/letsencrypt/live/onedollarclub.fun/privkey.pem",
   },
 
