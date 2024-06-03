@@ -24,7 +24,7 @@ import {
   handlePostCreatePositions,
   handlePostPoolDeposit,
 } from "./routes/routes";
-import express from "express";
+import path from "path";
 dotenv.config({
   path: "./.env",
 });
@@ -74,44 +74,48 @@ const poolConfigAddress = new PublicKey(
   "3ZsiWpKCoADMkz9w72A78Z6c6NnAoqwyDyQk1puMXPHe"
 );
 
-const server = Bun.serve({
-  port: 80,
-  fetch: async (req, server) => {
-    if (req.method === "OPTIONS") {
-      const res = new Response("Departed", CORS_HEADERS);
-      return res;
-    }
-    if (server.upgrade(req)) return;
-    const res = await handleRoutes(req, server);
-    const response = new Response(res.body, {
-      status: res.status,
-      headers: {
-        "Content-Type": "application/json",
-        ...CORS_HEADERS.headers,
-      },
-    });
-    return response;
-  },
-  tls: {
-    cert: "./cert/cert.pem",
-    key: "./cert/key.pem",
-  },
+try {
+  const server = Bun.serve({
+    port: 4000,
+    fetch: async (req, server) => {
+      if (req.method === "OPTIONS") {
+        const res = new Response("Departed", CORS_HEADERS);
+        return res;
+      }
+      if (server.upgrade(req)) return;
+      const res = await handleRoutes(req, server);
+      const response = new Response(res.body, {
+        status: res.status,
+        headers: {
+          "Content-Type": "application/json",
+          ...CORS_HEADERS.headers,
+        },
+      });
+      return response;
+    },
+    tls: {
+      cert: Bun.file(path.join(__dirname, "cert", "cert.pem")),
+      key: Bun.file(path.join(__dirname, "cert", "key.pem")),
+    },
 
-  websocket: {
-    message: (ws) => {
-      console.log(ws.data);
+    websocket: {
+      message: (ws) => {
+        console.log(ws.data);
+      },
+      open: (ws) => {
+        ws.send("Hello world");
+      },
+      close: (ws) => {
+        ws.send("Goodbye world");
+      },
+      drain: (ws) => {
+        console.log("Drain");
+      },
     },
-    open: (ws) => {
-      ws.send("Hello world");
-    },
-    close: (ws) => {
-      ws.send("Goodbye world");
-    },
-    drain: (ws) => {
-      console.log("Drain");
-    },
-  },
-});
+  });
+} catch (e) {
+  console.log(e);
+}
 
 let poolConfigAccount: PoolConfig;
 try {
@@ -120,7 +124,7 @@ try {
   console.log("error");
 }
 
-console.log("Server running on port" + server.port);
+console.log("Server running on port" + "4000");
 
 const startPoolConfigJob = cron.schedule("0 0 * * *", () => {
   console.log("Job executed at midnight UTC.");
