@@ -1,6 +1,11 @@
 import { PublicKey } from "@solana/web3.js";
 import db from "../db/connection";
-import { type Position, type Points, type Deposits } from "../models/models";
+import {
+  type Position,
+  type Points,
+  type Deposits,
+  type LeaderBoard,
+} from "../models/models";
 import type { PoolConfig } from "../sdk/poolConfig";
 import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
 import { fetchBirdeyeTokenPrices } from "../utils/helpers";
@@ -440,5 +445,27 @@ export const hanldeGetBirdeyeTokenPrices = async () => {
     return Response.json({ data: tokenPrices }, { status: 200 });
   } catch (e) {
     return Response.json({ error: "Error in getting prices" }, { status: 500 });
+  }
+};
+
+export const handleGetLeaderboard = async (poolId: string) => {
+  try {
+    const leaderboardCollection = await db.collection<LeaderBoard>(
+      "leaderBoard"
+    );
+    const leaderboard = await leaderboardCollection
+      .find({ poolId })
+      .sort({ points: -1 })
+      .toArray();
+
+    if (leaderboard.length === 0) {
+      return Response.json({ message: "No data found" }, { status: 200 });
+    }
+    return Response.json({ data: leaderboard }, { status: 200 });
+  } catch (e) {
+    return Response.json(
+      { error: "Error in getting leaderboard" },
+      { status: 500 }
+    );
   }
 };

@@ -15,6 +15,7 @@ import { HELIUS_DEVNET_RPC_ENDPOINT } from "./utils/constants";
 import { PoolConfig } from "./sdk/poolConfig";
 import os from "os";
 import {
+  handleGetLeaderboard,
   handleGetPoints,
   handleGetPoolDeposits,
   handleGetPositions,
@@ -40,6 +41,7 @@ const urls: Urls[] = [
   "/isAllowedToPlay",
   "/poolPoints",
   "/poolCreatePositions",
+  "/leaderBoard",
 ];
 
 const CORS_HEADERS = {
@@ -249,5 +251,8 @@ const handleRoutes = async (req: Request): Promise<Response> => {
         return Response.json({ error: "No positions passed" }, { status: 400 });
       }
       return await handlePostCreatePositions(reqJson.positions, poolId, pubkey);
+
+    case "/leaderBoard":
+      return await handleGetLeaderboard(poolId);
   }
 };
