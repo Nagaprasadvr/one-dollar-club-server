@@ -133,8 +133,7 @@ const endPoolConfigJob = cron.schedule("0 23 * * *", () => {
   console.log("Job executed at 23:00 UTC.");
 });
 
-const calcLeaderBoardJob = cron.schedule("0 0 * * *", async () => {
-  console.log("Job executed at 12:00 UTC.");
+const calcLeaderBoardJob = cron.schedule("*/10 * * *", async () => {
   await execCalculateLeaderBoardJob(poolId);
 });
 
