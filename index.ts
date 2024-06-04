@@ -1,9 +1,7 @@
-import { serve, type Server } from "bun";
 import * as cron from "node-cron";
 import type { RequestMethods, Urls } from "./utils/types";
 import {
   execCalculateLeaderBoardJob,
-  fetchBirdeyeTokenPrices,
   generatePoolId,
   getQueryParams,
   getRouteEndpoint,
@@ -13,10 +11,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { SDK } from "./sdk/sdk";
-import {
-  HELIUS_DEVNET_RPC_ENDPOINT,
-  PROJECTS_TO_PLAY,
-} from "./utils/constants";
+import { HELIUS_DEVNET_RPC_ENDPOINT } from "./utils/constants";
 import { PoolConfig } from "./sdk/poolConfig";
 import os from "os";
 import {
@@ -29,7 +24,7 @@ import {
   handlePostCreatePositions,
   handlePostPoolDeposit,
 } from "./routes/routes";
-import path from "path";
+
 dotenv.config({
   path: "./.env",
 });
@@ -136,8 +131,8 @@ const endPoolConfigJob = cron.schedule("0 23 * * *", () => {
   console.log("Job executed at 23:00 UTC.");
 });
 
-const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
-  console.log("Job executed every 1 minute.");
+const calcLeaderBoardJob = cron.schedule("0 0 * * *", async () => {
+  console.log("Job executed at 12:00 UTC.");
   await execCalculateLeaderBoardJob(poolId);
 });
 
