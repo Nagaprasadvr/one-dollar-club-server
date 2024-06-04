@@ -50,7 +50,7 @@ const CORS_HEADERS = {
   },
 };
 
-let poolId = "676gjjgufyfyudtyduy";
+let poolId = generatePoolId();
 console.log("Pool ID", poolId);
 const homeDir = os.homedir();
 
