@@ -22,3 +22,11 @@ export type Position = {
   positionType: "long" | "short";
   liquidationPrice: number;
 };
+
+export type LeaderBoard = {
+  pubkey: string;
+  pointsAllocated: number;
+  poolId: string;
+  finalPoints: number;
+  top3Positions: string;
+};

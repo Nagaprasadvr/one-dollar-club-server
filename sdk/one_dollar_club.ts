@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/one_dollar_club.json`.
  */
 export type OneDollarClub = {
-  address: "HaebyXgGqUgGLQkY93CTm8iEC6gBjH1NU3Zgr7EG4wNW";
+  address: "7Q4bu8V1QCdbRCKgy8Ti31UpXzkzwz7gp34Hvym6eFiv";
   metadata: {
     name: "oneDollarClub";
     version: "0.1.0";
@@ -134,8 +134,38 @@ export type OneDollarClub = {
       ];
     },
     {
+      name: "pauseDeposits";
+      discriminator: [206, 186, 203, 153, 253, 61, 206, 122];
+      accounts: [
+        {
+          name: "poolConfig";
+          writable: true;
+        },
+        {
+          name: "poolAuthority";
+          signer: true;
+        }
+      ];
+      args: [];
+    },
+    {
       name: "pausePoolState";
       discriminator: [186, 42, 129, 90, 238, 2, 183, 82];
+      accounts: [
+        {
+          name: "poolConfig";
+          writable: true;
+        },
+        {
+          name: "poolAuthority";
+          signer: true;
+        }
+      ];
+      args: [];
+    },
+    {
+      name: "resumeDeposits";
+      discriminator: [208, 78, 64, 241, 58, 181, 167, 66];
       accounts: [
         {
           name: "poolConfig";
@@ -252,6 +282,16 @@ export type OneDollarClub = {
       code: 6009;
       name: "overflow";
       msg: "overflow";
+    },
+    {
+      code: 6010;
+      name: "depositsPaused";
+      msg: "Deposist paused";
+    },
+    {
+      code: 6011;
+      name: "depositsResumed";
+      msg: "Deposits resumed";
     }
   ];
   types: [
@@ -295,6 +335,10 @@ export type OneDollarClub = {
           {
             name: "poolBalance";
             type: "f32";
+          },
+          {
+            name: "poolDepositsPaused";
+            type: "bool";
           }
         ];
       };
@@ -315,8 +359,9 @@ export type OneDollarClub = {
     }
   ];
 };
+
 export const IDL: OneDollarClub = {
-  address: "HaebyXgGqUgGLQkY93CTm8iEC6gBjH1NU3Zgr7EG4wNW",
+  address: "7Q4bu8V1QCdbRCKgy8Ti31UpXzkzwz7gp34Hvym6eFiv",
   metadata: {
     name: "oneDollarClub",
     version: "0.1.0",
@@ -445,8 +490,38 @@ export const IDL: OneDollarClub = {
       ],
     },
     {
+      name: "pauseDeposits",
+      discriminator: [206, 186, 203, 153, 253, 61, 206, 122],
+      accounts: [
+        {
+          name: "poolConfig",
+          writable: true,
+        },
+        {
+          name: "poolAuthority",
+          signer: true,
+        },
+      ],
+      args: [],
+    },
+    {
       name: "pausePoolState",
       discriminator: [186, 42, 129, 90, 238, 2, 183, 82],
+      accounts: [
+        {
+          name: "poolConfig",
+          writable: true,
+        },
+        {
+          name: "poolAuthority",
+          signer: true,
+        },
+      ],
+      args: [],
+    },
+    {
+      name: "resumeDeposits",
+      discriminator: [208, 78, 64, 241, 58, 181, 167, 66],
       accounts: [
         {
           name: "poolConfig",
@@ -564,6 +639,16 @@ export const IDL: OneDollarClub = {
       name: "overflow",
       msg: "overflow",
     },
+    {
+      code: 6010,
+      name: "depositsPaused",
+      msg: "Deposist paused",
+    },
+    {
+      code: 6011,
+      name: "depositsResumed",
+      msg: "Deposits resumed",
+    },
   ],
   types: [
     {
@@ -606,6 +691,10 @@ export const IDL: OneDollarClub = {
           {
             name: "poolBalance",
             type: "f32",
+          },
+          {
+            name: "poolDepositsPaused",
+            type: "bool",
           },
         ],
       },

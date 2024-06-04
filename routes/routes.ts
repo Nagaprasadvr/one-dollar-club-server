@@ -2,7 +2,8 @@ import { PublicKey } from "@solana/web3.js";
 import db from "../db/connection";
 import { type Position, type Points, type Deposits } from "../models/models";
 import type { PoolConfig } from "../sdk/poolConfig";
-import { MAX_POINTS } from "../utils/constants";
+import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
+import { fetchBirdeyeTokenPrices } from "../utils/helpers";
 
 export const handlePoolConfigRoute = (poolConfig: PoolConfig): Response => {
   if (!poolConfig)
@@ -429,5 +430,15 @@ export const handleGetPoints = async (pubkey: string, poolId: string) => {
     return Response.json({ data: points.pointsRemaining }, { status: 200 });
   } catch (e) {
     return Response.json({ error: "Error in getting points" }, { status: 500 });
+  }
+};
+
+export const hanldeGetBirdeyeTokenPrices = async () => {
+  try {
+    const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
+    const tokenPrices = await fetchBirdeyeTokenPrices(tokenAddressArray);
+    return Response.json({ data: tokenPrices }, { status: 200 });
+  } catch (e) {
+    return Response.json({ error: "Error in getting prices" }, { status: 500 });
   }
 };

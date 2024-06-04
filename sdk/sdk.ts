@@ -12,7 +12,7 @@ import {
 import { Connection, PublicKey, type ConfirmOptions } from "@solana/web3.js";
 
 export const PROGRAM_ID = new PublicKey(
-  "HaebyXgGqUgGLQkY93CTm8iEC6gBjH1NU3Zgr7EG4wNW"
+  "7Q4bu8V1QCdbRCKgy8Ti31UpXzkzwz7gp34Hvym6eFiv"
 );
 
 export type RawPoolConfig = IdlAccounts<OneDollarClubTypes>["poolConfig"];

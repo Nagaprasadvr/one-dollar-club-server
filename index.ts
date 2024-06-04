@@ -2,6 +2,8 @@ import { serve, type Server } from "bun";
 import * as cron from "node-cron";
 import type { RequestMethods, Urls } from "./utils/types";
 import {
+  execCalculateLeaderBoardJob,
+  fetchBirdeyeTokenPrices,
   generatePoolId,
   getQueryParams,
   getRouteEndpoint,
@@ -11,7 +13,10 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { SDK } from "./sdk/sdk";
-import { HELIUS_DEVNET_RPC_ENDPOINT } from "./utils/constants";
+import {
+  HELIUS_DEVNET_RPC_ENDPOINT,
+  PROJECTS_TO_PLAY,
+} from "./utils/constants";
 import { PoolConfig } from "./sdk/poolConfig";
 import os from "os";
 import {
@@ -71,7 +76,7 @@ const poolActiveMint = new PublicKey(
 );
 
 const poolConfigAddress = new PublicKey(
-  "3ZsiWpKCoADMkz9w72A78Z6c6NnAoqwyDyQk1puMXPHe"
+  "7d9QiPPQ4q9DV4UyLS3j9ZSR71NRwCQ4NMYeHaCkXByz"
 );
 
 const server = Bun.serve({
@@ -82,7 +87,7 @@ const server = Bun.serve({
       return res;
     }
     if (server.upgrade(req)) return;
-    const res = await handleRoutes(req, server);
+    const res = await handleRoutes(req);
     const response = new Response(res.body, {
       status: res.status,
       headers: {
@@ -123,14 +128,22 @@ const startPoolConfigJob = cron.schedule("0 0 * * *", () => {
   poolId = generatePoolId();
 });
 
+const pauseDepositsJob = cron.schedule("0 22 * * *", () => {
+  console.log("Job executed at 22:00 UTC.");
+});
+
 const endPoolConfigJob = cron.schedule("0 23 * * *", () => {
   console.log("Job executed at 23:00 UTC.");
 });
 
-const handleRoutes = async (
-  req: Request,
-  server: Server
-): Promise<Response> => {
+const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
+  console.log("Job executed every 1 minute.");
+  await execCalculateLeaderBoardJob(poolId);
+});
+
+console.log("poolServerId", poolId);
+
+const handleRoutes = async (req: Request): Promise<Response> => {
   const route = urls.find((url) => url === getRouteEndpoint(req.url));
   const queryParams = getQueryParams(req.url);
   const method = req.method as RequestMethods;

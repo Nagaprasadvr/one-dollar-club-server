@@ -55,7 +55,7 @@ export class PoolConfig {
     poolAuthority: PublicKey,
     poolConfig: solana.Keypair,
     poolActiveMint: PublicKey
-  ): Promise<PoolConfig> {
+  ) {
     await sdk.program.methods
       .initializeConfig(
         poolDepositPerUser,
@@ -70,8 +70,6 @@ export class PoolConfig {
       })
       .signers([poolConfig])
       .rpc();
-
-    return PoolConfig.fetch(sdk, poolConfig.publicKey);
   }
 
   async activatePool(): Promise<PoolConfig> {
