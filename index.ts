@@ -2,10 +2,12 @@ import * as cron from "node-cron";
 import type { RequestMethods, Urls } from "./utils/types";
 import {
   execCalculateLeaderBoardJob,
+  fetchAndSetPoolId,
   generatePoolId,
   getQueryParams,
   getRouteEndpoint,
   getWalletFromKeyPair,
+  updateExistingPoolId,
 } from "./utils/helpers";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -19,6 +21,7 @@ import {
   handleGetPoints,
   handleGetPoolDeposits,
   handleGetPositions,
+  handleGetPositionsStat,
   handleIsAllowedToPlay,
   handlePoolConfigRoute,
   handlePostCreatePosition,
@@ -42,6 +45,7 @@ const urls: Urls[] = [
   "/poolPoints",
   "/poolCreatePositions",
   "/leaderBoard",
+  "/getPositionsStat",
 ];
 
 const CORS_HEADERS = {
@@ -52,7 +56,7 @@ const CORS_HEADERS = {
   },
 };
 
-let poolId = generatePoolId();
+let poolId = await fetchAndSetPoolId();
 console.log("Pool ID", poolId);
 const homeDir = os.homedir();
 
@@ -120,9 +124,9 @@ try {
 
 console.log("Server running on port" + " " + server.port);
 
-const startPoolConfigJob = cron.schedule("0 0 * * *", () => {
+const startPoolConfigJob = cron.schedule("0 0 * * *", async () => {
   console.log("Job executed at midnight UTC.");
-  poolId = generatePoolId();
+  poolId = await updateExistingPoolId();
 });
 
 const pauseDepositsJob = cron.schedule("0 22 * * *", () => {
@@ -136,8 +140,6 @@ const endPoolConfigJob = cron.schedule("0 23 * * *", () => {
 const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
   await execCalculateLeaderBoardJob(poolId);
 });
-
-console.log("poolServerId", poolId);
 
 const handleRoutes = async (req: Request): Promise<Response> => {
   const route = urls.find((url) => url === getRouteEndpoint(req.url));
@@ -253,5 +255,12 @@ const handleRoutes = async (req: Request): Promise<Response> => {
 
     case "/leaderBoard":
       return await handleGetLeaderboard(poolId);
+
+    case "/getPositionsStat":
+      pubkey = queryParams?.pubkey;
+      if (!pubkey) {
+        return Response.json({ error: "No pubkey" }, { status: 400 });
+      }
+      return await handleGetPositionsStat(String(pubkey), poolId);
   }
 };

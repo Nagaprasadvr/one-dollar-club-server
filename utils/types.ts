@@ -9,7 +9,8 @@ export type Urls =
   | "/isAllowedToPlay"
   | "/poolPoints"
   | "/poolCreatePositions"
-  | "/leaderBoard";
+  | "/leaderBoard"
+  | "/getPositionsStat";
 
 export type RequestMethods = "GET" | "POST" | "PUT" | "DELETE";
 export interface BirdeyeTokenPriceData {

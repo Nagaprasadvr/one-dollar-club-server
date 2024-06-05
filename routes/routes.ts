@@ -8,7 +8,7 @@ import {
 } from "../models/models";
 import type { PoolConfig } from "../sdk/poolConfig";
 import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
-import { fetchBirdeyeTokenPrices } from "../utils/helpers";
+import { calculateResult, fetchBirdeyeTokenPrices } from "../utils/helpers";
 
 export const handlePoolConfigRoute = (poolConfig: PoolConfig): Response => {
   if (!poolConfig)
@@ -465,6 +465,78 @@ export const handleGetLeaderboard = async (poolId: string) => {
   } catch (e) {
     return Response.json(
       { error: "Error in getting leaderboard" },
+      { status: 500 }
+    );
+  }
+};
+
+export const handleGetPositionsStat = async (
+  pubkey: string,
+  poolId: string
+) => {
+  try {
+    const projectsToPlay = PROJECTS_TO_PLAY.map((project) => project.mint);
+    const tokenPrice = await fetchBirdeyeTokenPrices(projectsToPlay);
+
+    const positionCollection = await db.collection<Position>("position");
+    const positions = await positionCollection
+      .find({ pubkey, poolId })
+      .toArray();
+    if (positions.length === 0) {
+      return Response.json({ message: "No positions found" }, { status: 200 });
+    }
+    let resultingPoints = 0;
+    const totalPointsAllocated = positions.reduce(
+      (a, b) => a + b.pointsAllocated,
+      0
+    );
+    const resultingPositions: {
+      tokenName: string;
+      resultingPoints: number;
+    }[] = [];
+
+    for (const position of positions) {
+      const currentPrice = tokenPrice.find(
+        (price) => price.address === position.tokenMint
+      );
+      if (!currentPrice) {
+        return Response.json({ error: "No price found" }, { status: 404 });
+      }
+      const finalPoints = calculateResult({
+        entryPrice: position.entryPrice,
+        leverage: position.leverage,
+        liquidationPrice: position.liquidationPrice,
+        positionType: position.positionType,
+        currentPrice: currentPrice.value,
+        pointsAllocated: position.pointsAllocated,
+      });
+      resultingPositions.push({
+        tokenName: position.tokenName,
+        resultingPoints: finalPoints,
+      });
+      resultingPoints += finalPoints;
+    }
+    const data: LeaderBoard = {
+      pubkey,
+      pointsAllocated: totalPointsAllocated,
+      poolId,
+      finalPoints: resultingPoints,
+      top3Positions: resultingPositions
+        .sort((a, b) => b.resultingPoints - a.resultingPoints)
+        .slice(0, 3)
+        .map((position) => position.tokenName)
+        .join(","),
+    };
+
+    return Response.json(
+      {
+        data,
+      },
+      { status: 200 }
+    );
+  } catch (e) {
+    return Response.json(
+      { error: "Error in getting positions" },
       { status: 500 }
     );
   }

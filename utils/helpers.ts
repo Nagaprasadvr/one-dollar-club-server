@@ -4,7 +4,12 @@ import type { Keypair } from "@solana/web3.js";
 import type { BirdeyeTokenPriceData } from "./types";
 import axios from "axios";
 import db from "../db/connection";
-import type { Deposits, LeaderBoard, Position } from "../models/models";
+import {
+  type PoolConfigId,
+  type Deposits,
+  type LeaderBoard,
+  type Position,
+} from "../models/models";
 import { PROJECTS_TO_PLAY } from "./constants";
 
 export const getRouteEndpoint = (url: string): string => {
@@ -37,7 +42,7 @@ export const getWalletFromKeyPair = (keypair: Keypair): Wallet => {
 
 export const generatePoolId = (): string => {
   let poolId = "";
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     poolId += String.fromCharCode(
       97 + Math.floor(Math.random() * 10 + Math.random() * 10)
     );
@@ -250,4 +255,43 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
   } catch (e) {
     console.log(e);
   }
+};
+
+export const fetchAndSetPoolId = async () => {
+  const poolConfigIdCollection = await db.collection<PoolConfigId>(
+    "poolConfigId"
+  );
+  const poolConfigIdData = await poolConfigIdCollection.findOne({});
+  if (!poolConfigIdData) {
+    const poolId = generatePoolId();
+    await poolConfigIdCollection.insertOne({
+      poolId,
+      lastUpdatedTs: Math.ceil(Date.now() / 1000),
+    });
+    return poolId;
+  }
+  return poolConfigIdData.poolId;
+};
+
+export const updateExistingPoolId = async () => {
+  const poolConfigIdCollection = await db.collection<PoolConfigId>(
+    "poolConfigId"
+  );
+  const poolConfigIdData = await poolConfigIdCollection.findOne({});
+  if (!poolConfigIdData) {
+    const poolId = await fetchAndSetPoolId();
+    return poolId;
+  }
+  const oldPoolId = poolConfigIdData.poolId;
+  const newPoolId = generatePoolId();
+  await poolConfigIdCollection.updateOne(
+    { poolId: oldPoolId },
+    {
+      $set: {
+        poolId: newPoolId,
+        lastUpdatedTs: Math.ceil(Date.now() / 1000),
+      },
+    }
+  );
+  return newPoolId;
 };

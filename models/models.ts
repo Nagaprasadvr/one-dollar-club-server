@@ -30,3 +30,8 @@ export type LeaderBoard = {
   finalPoints: number;
   top3Positions: string;
 };
+
+export type PoolConfigId = {
+  poolId: string;
+  lastUpdatedTs: number;
+};
