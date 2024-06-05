@@ -7,6 +7,7 @@ import {
   getQueryParams,
   getRouteEndpoint,
   getWalletFromKeyPair,
+  getWinner,
   updateExistingPoolId,
 } from "./utils/helpers";
 import dotenv from "dotenv";
@@ -124,17 +125,33 @@ try {
 
 console.log("Server running on port" + " " + server.port);
 
-const startPoolConfigJob = cron.schedule("0 0 * * *", async () => {
-  console.log("Job executed at midnight UTC.");
-  poolId = await updateExistingPoolId();
+const activatePoolConfigAndDepositsJob = cron.schedule(
+  "0 1 * * *",
+  async () => {
+    console.log("activate pool config and deposits  at 01:00 UTC.");
+    poolId = await updateExistingPoolId();
+    if (!poolConfigAccount) return;
+    poolConfigAccount = await poolConfigAccount.activatePool();
+    if (!poolConfigAccount) return;
+    poolConfigAccount = await poolConfigAccount.activateDeposits();
+  }
+);
+
+const pauseDepositsJob = cron.schedule("0 22 * * *", async () => {
+  console.log("depoists paused at 22:00 UTC.");
+  if (!poolConfigAccount) return;
+  poolConfigAccount = await poolConfigAccount.pauseDeposit();
 });
 
-const pauseDepositsJob = cron.schedule("0 22 * * *", () => {
-  console.log("Job executed at 22:00 UTC.");
-});
-
-const endPoolConfigJob = cron.schedule("0 23 * * *", () => {
-  console.log("Job executed at 23:00 UTC.");
+const endPoolConfigJob = cron.schedule("0 23 * * *", async () => {
+  console.log(" inactivate pool config Job executed at 23:00 UTC.");
+  if (!poolConfigAccount) return;
+  poolConfigAccount = await poolConfigAccount.pausePool();
+  await execCalculateLeaderBoardJob(poolId);
+  const winner = await getWinner();
+  if (!winner) return;
+  console.log("Winner", winner);
+  poolConfigAccount = await poolConfigAccount.transferPoolWin(winner);
 });
 
 const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {

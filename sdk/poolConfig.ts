@@ -2,6 +2,7 @@ import type { PublicKey } from "@solana/web3.js";
 import type { PoolState } from "./types";
 import type { RawPoolConfig, SDK } from "./sdk";
 import * as solana from "@solana/web3.js";
+import * as spl from "@solana/spl-token";
 
 export class PoolConfig {
   private sdk: SDK;
@@ -33,6 +34,18 @@ export class PoolConfig {
   static async fetch(sdk: SDK, address: PublicKey): Promise<PoolConfig> {
     const poolConfigAcc = await sdk.program.account.poolConfig.fetch(address);
     return new PoolConfig(sdk, poolConfigAcc);
+  }
+
+  async pauseDeposit(): Promise<PoolConfig> {
+    await this.sdk.program.methods
+      .pauseDeposits()
+      .accountsStrict({
+        poolAuthority: this.poolAuthority,
+        poolConfig: this.poolAddress,
+      })
+      .rpc();
+
+    return this.reload();
   }
 
   async pausePool(): Promise<PoolConfig> {
@@ -84,6 +97,18 @@ export class PoolConfig {
     return this.reload();
   }
 
+  async activateDeposits(): Promise<PoolConfig> {
+    await this.sdk.program.methods
+      .resumeDeposits()
+      .accountsStrict({
+        poolAuthority: this.poolAuthority,
+        poolConfig: this.poolAddress,
+      })
+      .rpc();
+
+    return this.reload();
+  }
+
   async changeMint(newMint: PublicKey): Promise<PoolConfig> {
     await this.sdk.program.methods
       .changeMint()
@@ -91,6 +116,43 @@ export class PoolConfig {
         poolAuthority: this.poolAuthority,
         poolConfig: this.poolAddress,
         mint: newMint,
+      })
+      .rpc();
+
+    return this.reload();
+  }
+
+  async transferPoolWin(winner: string): Promise<PoolConfig> {
+    const winnerPubkey = new solana.PublicKey(winner);
+
+    const winnerTokenAccount = spl.getAssociatedTokenAddressSync(
+      this.poolActiveMint,
+      winnerPubkey
+    );
+
+    const squadsTokenAccount = spl.getAssociatedTokenAddressSync(
+      this.poolActiveMint,
+      this.squadsAuthorityPubkey
+    );
+
+    const poolTokenAccount = spl.getAssociatedTokenAddressSync(
+      this.poolActiveMint,
+      this.poolAuthority
+    );
+
+    await this.sdk.program.methods
+      .transferWinAllocation()
+      .accountsStrict({
+        poolAuthority: this.poolAuthority,
+        poolConfig: this.poolAddress,
+        winnerTokenAccount,
+        winner: winnerPubkey,
+        squadsAuthority: this.squadsAuthorityPubkey,
+        squadsTokenAccount,
+        poolTokenAccount: poolTokenAccount,
+        mint: this.poolActiveMint,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+        systemProgram: solana.SystemProgram.programId,
       })
       .rpc();
 

@@ -295,3 +295,14 @@ export const updateExistingPoolId = async () => {
   );
   return newPoolId;
 };
+
+export const getWinner = async () => {
+  const leaderBoardCollection = await db.collection<LeaderBoard>("leaderBoard");
+  const leaderBoardData = await leaderBoardCollection.find({}).toArray();
+  if (leaderBoardData.length === 0) {
+    return;
+  }
+  const winner = leaderBoardData[0];
+
+  return winner.pubkey;
+};
