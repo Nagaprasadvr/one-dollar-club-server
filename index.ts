@@ -3,7 +3,6 @@ import type { RequestMethods, Urls } from "./utils/types";
 import {
   execCalculateLeaderBoardJob,
   fetchAndSetPoolId,
-  generatePoolId,
   getQueryParams,
   getRouteEndpoint,
   getWalletFromKeyPair,
@@ -88,7 +87,6 @@ const server = Bun.serve({
       const res = new Response("Departed", CORS_HEADERS);
       return res;
     }
-    if (server.upgrade(req)) return;
     const res = await handleRoutes(req);
     const response = new Response(res.body, {
       status: res.status,
@@ -98,21 +96,6 @@ const server = Bun.serve({
       },
     });
     return response;
-  },
-
-  websocket: {
-    message: (ws) => {
-      console.log(ws.data);
-    },
-    open: (ws) => {
-      ws.send("Hello world");
-    },
-    close: (ws) => {
-      ws.send("Goodbye world");
-    },
-    drain: (ws) => {
-      console.log("Drain");
-    },
   },
 });
 
