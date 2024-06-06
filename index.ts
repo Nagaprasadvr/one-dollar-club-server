@@ -13,7 +13,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { SDK } from "./sdk/sdk";
-import { HELIUS_DEVNET_RPC_ENDPOINT } from "./utils/constants";
+import { authHash, HELIUS_DEVNET_RPC_ENDPOINT } from "./utils/constants";
 import { PoolConfig } from "./sdk/poolConfig";
 import os from "os";
 import {
@@ -46,6 +46,7 @@ const urls: Urls[] = [
   "/poolCreatePositions",
   "/leaderBoard",
   "/getPositionsStat",
+  "/changePoolIdByAuthority",
 ];
 
 const CORS_HEADERS = {
@@ -281,5 +282,24 @@ const handleRoutes = async (req: Request): Promise<Response> => {
         return Response.json({ error: "No pubkey" }, { status: 400 });
       }
       return await handleGetPositionsStat(String(pubkey), poolId);
+
+    case "/changePoolIdByAuthority":
+      const reqJson2 = await req.json();
+      if (!reqJson2) {
+        return Response.json({ error: "No body" }, { status: 400 });
+      }
+      const sentAuthHash = reqJson2?.authHash;
+      if (!sentAuthHash) {
+        return Response.json({ error: "No authHash passed" }, { status: 400 });
+      }
+      if (sentAuthHash !== authHash) {
+        return Response.json(
+          { error: "Authentication failed" },
+          { status: 400 }
+        );
+      }
+      poolId = await updateExistingPoolId();
+
+      return Response.json({ poolId }, { status: 200 });
   }
 };

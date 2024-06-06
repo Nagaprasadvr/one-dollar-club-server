@@ -43,3 +43,6 @@ export const PROJECTS_TO_PLAY = [
     mint: "7atgF8KQo4wJrD5ATGX7t1V2zVvykPJbFfNeVf1icFv1",
   },
 ];
+
+export const authHash =
+  "d92931b0e7b0296e08bd4cccfe59beceb3f554f01f9630b99152de09b3435ebb";
