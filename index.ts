@@ -125,8 +125,12 @@ try {
 
 console.log("Server running on port" + " " + server.port);
 
+const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
+  await execCalculateLeaderBoardJob(poolId);
+});
+
 const activatePoolConfigAndDepositsJob = cron.schedule(
-  "0 1 * * *",
+  "52 8 * * *",
   async () => {
     console.log("activate pool config and deposits  at 01:00 UTC.");
     poolId = await updateExistingPoolId();
@@ -134,17 +138,22 @@ const activatePoolConfigAndDepositsJob = cron.schedule(
     poolConfigAccount = await poolConfigAccount.activatePool();
     if (!poolConfigAccount) return;
     poolConfigAccount = await poolConfigAccount.activateDeposits();
+    calcLeaderBoardJob.start();
   }
 );
 
-const pauseDepositsJob = cron.schedule("0 22 * * *", async () => {
+const pauseDepositsJob = cron.schedule("47 8 * * *", async () => {
+  console.log("pool config.", poolConfigAccount);
   console.log("depoists paused at 22:00 UTC.");
   if (!poolConfigAccount) return;
   poolConfigAccount = await poolConfigAccount.pauseDeposit();
 });
 
-const endPoolConfigJob = cron.schedule("0 23 * * *", async () => {
+const endPoolConfigJob = cron.schedule("49 8 * * *", async () => {
+  calcLeaderBoardJob.stop();
+  console.log("pool config", poolConfigAccount);
   console.log(" inactivate pool config Job executed at 23:00 UTC.");
+
   if (!poolConfigAccount) return;
   poolConfigAccount = await poolConfigAccount.pausePool();
   await execCalculateLeaderBoardJob(poolId);
@@ -152,10 +161,6 @@ const endPoolConfigJob = cron.schedule("0 23 * * *", async () => {
   if (!winner) return;
   console.log("Winner", winner);
   poolConfigAccount = await poolConfigAccount.transferPoolWin(winner);
-});
-
-const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
-  await execCalculateLeaderBoardJob(poolId);
 });
 
 const handleRoutes = async (req: Request): Promise<Response> => {
