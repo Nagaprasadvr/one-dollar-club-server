@@ -126,7 +126,7 @@ try {
 console.log("Server running on port" + " " + server.port);
 
 const activatePoolConfigAndDepositsJob = cron.schedule(
-  "46 6 * * *",
+  "0 1 * * *",
   async () => {
     console.log("activate pool config and deposits  at 01:00 UTC.");
     poolId = await updateExistingPoolId();
@@ -137,13 +137,13 @@ const activatePoolConfigAndDepositsJob = cron.schedule(
   }
 );
 
-const pauseDepositsJob = cron.schedule("44 6 * * *", async () => {
+const pauseDepositsJob = cron.schedule("0 22 * * *", async () => {
   console.log("depoists paused at 22:00 UTC.");
   if (!poolConfigAccount) return;
   poolConfigAccount = await poolConfigAccount.pauseDeposit();
 });
 
-const endPoolConfigJob = cron.schedule("45 6 * * *", async () => {
+const endPoolConfigJob = cron.schedule("0 23 * * *", async () => {
   console.log(" inactivate pool config Job executed at 23:00 UTC.");
   if (!poolConfigAccount) return;
   poolConfigAccount = await poolConfigAccount.pausePool();
@@ -157,11 +157,6 @@ const endPoolConfigJob = cron.schedule("45 6 * * *", async () => {
 const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
   await execCalculateLeaderBoardJob(poolId);
 });
-
-activatePoolConfigAndDepositsJob.start();
-pauseDepositsJob.start();
-endPoolConfigJob.start();
-calcLeaderBoardJob.start();
 
 const handleRoutes = async (req: Request): Promise<Response> => {
   const route = urls.find((url) => url === getRouteEndpoint(req.url));
