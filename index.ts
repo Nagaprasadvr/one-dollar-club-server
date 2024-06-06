@@ -109,6 +109,10 @@ try {
 
 console.log("Server running on port" + " " + server.port);
 
+console.log(
+  "Server Time:" + new Date().toLocaleTimeString("en-US", { timeZone: "UTC" })
+);
+
 const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
   await execCalculateLeaderBoardJob(poolId);
 });
