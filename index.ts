@@ -126,7 +126,7 @@ try {
 console.log("Server running on port" + " " + server.port);
 
 const activatePoolConfigAndDepositsJob = cron.schedule(
-  "0 1 * * *",
+  "38 6 * * *",
   async () => {
     console.log("activate pool config and deposits  at 01:00 UTC.");
     poolId = await updateExistingPoolId();
@@ -137,13 +137,13 @@ const activatePoolConfigAndDepositsJob = cron.schedule(
   }
 );
 
-const pauseDepositsJob = cron.schedule("0 22 * * *", async () => {
+const pauseDepositsJob = cron.schedule("35 6 * * *", async () => {
   console.log("depoists paused at 22:00 UTC.");
   if (!poolConfigAccount) return;
   poolConfigAccount = await poolConfigAccount.pauseDeposit();
 });
 
-const endPoolConfigJob = cron.schedule("0 23 * * *", async () => {
+const endPoolConfigJob = cron.schedule("37 6 * * *", async () => {
   console.log(" inactivate pool config Job executed at 23:00 UTC.");
   if (!poolConfigAccount) return;
   poolConfigAccount = await poolConfigAccount.pausePool();
