@@ -130,36 +130,51 @@ const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
 });
 
 const activatePoolConfigAndDepositsJob = cron.schedule(
-  "15 9 * * *",
+  "0 1 * * *",
   async () => {
     console.log("activate pool config and deposits  at 01:00 UTC.");
     poolId = await updateExistingPoolId();
     if (!poolConfigAccount) return;
-    poolConfigAccount = await poolConfigAccount.activatePool();
-    if (!poolConfigAccount) return;
-    poolConfigAccount = await poolConfigAccount.activateDeposits();
-    calcLeaderBoardJob.start();
+    try {
+      poolConfigAccount = await poolConfigAccount.activatePool();
+      poolConfigAccount = await poolConfigAccount.activateDeposits();
+      calcLeaderBoardJob.start();
+    } catch (e) {
+      console.log("error1", e);
+    }
   }
 );
 
-const pauseDepositsJob = cron.schedule("11 9 * * *", async () => {
-  console.log("pool config.", poolConfigAccount);
+const pauseDepositsJob = cron.schedule("0 22 * * *", async () => {
   console.log("depoists paused at 22:00 UTC.");
   if (!poolConfigAccount) return;
-  poolConfigAccount = await poolConfigAccount.pauseDeposit();
+  try {
+    poolConfigAccount = await poolConfigAccount.pauseDeposit();
+  } catch (e) {
+    console.log("error2", e);
+  }
 });
 
-const endPoolConfigJob = cron.schedule("13 9 * * *", async () => {
+const endPoolConfigJob = cron.schedule("0 23 * * *", async () => {
   calcLeaderBoardJob.stop();
-  console.log("pool config", poolConfigAccount);
   console.log(" inactivate pool config Job executed at 23:00 UTC.");
-
   if (!poolConfigAccount) return;
-  poolConfigAccount = await poolConfigAccount.pausePool();
+  try {
+    poolConfigAccount = await poolConfigAccount.pausePool();
+  } catch (e) {
+    console.log("error3", e);
+  }
+});
+
+const transferPoolWinnersJob = cron.schedule("10 23 * * *", async () => {
   const winner = await getWinner();
   if (!winner) return;
   console.log("Winner", winner);
-  poolConfigAccount = await poolConfigAccount.transferPoolWin(winner);
+  try {
+    poolConfigAccount = await poolConfigAccount.transferPoolWin(winner);
+  } catch (e) {
+    console.log("error4", e);
+  }
 });
 
 const handleRoutes = async (req: Request): Promise<Response> => {

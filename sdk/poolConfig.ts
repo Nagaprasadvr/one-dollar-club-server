@@ -39,7 +39,7 @@ export class PoolConfig {
   }
 
   async pauseDeposit(): Promise<PoolConfig> {
-    await this.sdk.program.methods
+    const sig = await this.sdk.program.methods
       .pauseDeposits()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
@@ -47,18 +47,19 @@ export class PoolConfig {
       })
       .rpc();
 
+    console.log("pauseDeposit sig", sig);
     return this.reload();
   }
 
   async pausePool(): Promise<PoolConfig> {
-    await this.sdk.program.methods
+    const sig = await this.sdk.program.methods
       .pausePoolState()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
         poolConfig: this.poolAddress,
       })
       .rpc();
-
+    console.log("pausePool sig", sig);
     return this.reload();
   }
 
@@ -88,7 +89,7 @@ export class PoolConfig {
   }
 
   async activatePool(): Promise<PoolConfig> {
-    await this.sdk.program.methods
+    const sig = await this.sdk.program.methods
       .activatePoolState()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
@@ -96,23 +97,24 @@ export class PoolConfig {
       })
       .rpc();
 
+    console.log("activatePool sig", sig);
     return this.reload();
   }
 
   async activateDeposits(): Promise<PoolConfig> {
-    await this.sdk.program.methods
+    const sig = await this.sdk.program.methods
       .resumeDeposits()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
         poolConfig: this.poolAddress,
       })
       .rpc();
-
+    console.log("activateDeposits sig", sig);
     return this.reload();
   }
 
   async changeMint(newMint: PublicKey): Promise<PoolConfig> {
-    await this.sdk.program.methods
+    const sig = await this.sdk.program.methods
       .changeMint()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
@@ -121,6 +123,7 @@ export class PoolConfig {
       })
       .rpc();
 
+    console.log("changeMint sig", sig);
     return this.reload();
   }
 
@@ -142,7 +145,7 @@ export class PoolConfig {
       this.poolAuthority
     );
 
-    await this.sdk.program.methods
+    const sig = await this.sdk.program.methods
       .transferWinAllocation()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
@@ -158,6 +161,7 @@ export class PoolConfig {
       })
       .rpc();
 
+    console.log("transferPoolWin sig", sig);
     return this.reload();
   }
 }
