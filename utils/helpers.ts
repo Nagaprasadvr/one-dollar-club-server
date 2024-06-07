@@ -336,14 +336,17 @@ export const usePoolConfigChange = async (
     const poolConfigAccountCollection = await db.collection<PoolConfigAccount>(
       "poolConfigAccount"
     );
-    const result = await poolConfigAccountCollection.updateOne(
-      {
-        poolAddress: poolConfig.poolAddress,
-      },
-      {
-        $set: newPoolConfigDBAccount,
-      }
-    );
-    console.log("result", result);
+    const poolConfigAccountData = await poolConfigAccountCollection.findOne({});
+    if (!poolConfigAccountData) {
+      await poolConfigAccountCollection.insertOne(newPoolConfigDBAccount);
+    } else {
+      const result = await poolConfigAccountCollection.updateOne(
+        {},
+        {
+          $set: newPoolConfigDBAccount,
+        }
+      );
+      console.log("result", result);
+    }
   });
 };
