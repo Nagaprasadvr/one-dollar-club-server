@@ -336,7 +336,7 @@ export const usePoolConfigChange = async (
     const poolConfigAccountCollection = await db.collection<PoolConfigAccount>(
       "poolConfigAccount"
     );
-    await poolConfigAccountCollection.replaceOne(
+    const result = await poolConfigAccountCollection.replaceOne(
       {
         poolAddress: poolConfig.poolAddress,
       },
@@ -345,5 +345,6 @@ export const usePoolConfigChange = async (
         upsert: true,
       }
     );
+    console.log("result", result);
   });
 };
