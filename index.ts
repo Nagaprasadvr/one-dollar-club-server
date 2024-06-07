@@ -163,6 +163,10 @@ const transferPoolWinnersJob = cron.schedule("10 23 * * *", async () => {
   }
 });
 
+const serverTime = cron.schedule("*/1 * * * *", () => {
+  console.log("Server Time:" + new Date().toLocaleTimeString());
+});
+
 const handleRoutes = async (req: Request): Promise<Response> => {
   const route = urls.find((url) => url === getRouteEndpoint(req.url));
   const queryParams = getQueryParams(req.url);

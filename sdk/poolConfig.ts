@@ -159,7 +159,9 @@ export class PoolConfig {
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         systemProgram: solana.SystemProgram.programId,
       })
-      .rpc();
+      .rpc({
+        commitment: "confirmed",
+      });
 
     console.log("transferPoolWin sig", sig);
     return this.reload();

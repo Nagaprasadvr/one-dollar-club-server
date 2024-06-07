@@ -192,7 +192,6 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       })
       .toArray();
 
-    console.log("players", players);
     for (const player of players) {
       const playerPositions = positions.filter(
         (position) => position.pubkey === player
@@ -245,7 +244,6 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       .sort((a, b) => b.finalPoints - a.finalPoints)
       .slice(0, 10);
 
-    console.log("Top 10 Leader Board", top10LeaderBoard);
     if (leaderBoardDbData.length === 0) {
       await leaderBoardCollection.insertMany(top10LeaderBoard);
     } else {
