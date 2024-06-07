@@ -1,3 +1,6 @@
+import type { PoolConfig } from "../sdk/poolConfig";
+import type { PoolState } from "../sdk/types";
+
 export type Deposits = {
   pubkey: string;
   timeStamp: number;
@@ -34,4 +37,16 @@ export type LeaderBoard = {
 export type PoolConfigId = {
   poolId: string;
   lastUpdatedTs: number;
+};
+
+export type PoolConfigAccount = {
+  poolState: PoolState;
+  poolAddress: string;
+  poolAuthority: string;
+  poolActiveMint: string;
+  poolDepositPerUser: number;
+  poolRoundWinAllocation: number;
+  squadsAuthorityPubkey: string;
+  poolBalance: number;
+  poolDepositsPaused: boolean;
 };

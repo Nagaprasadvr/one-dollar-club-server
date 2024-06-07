@@ -8,6 +8,7 @@ import {
   getWalletFromKeyPair,
   getWinner,
   updateExistingPoolId,
+  usePoolConfigChange,
 } from "./utils/helpers";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -100,12 +101,14 @@ const server = Bun.serve({
   },
 });
 
-let poolConfigAccount: PoolConfig;
+let poolConfigAccount: PoolConfig | null = null;
 try {
   poolConfigAccount = await PoolConfig.fetch(sdk, poolConfigAddress);
 } catch (e) {
   console.log("error");
 }
+
+usePoolConfigChange(poolConfigAccount, sdk);
 
 console.log("Server running on port" + " " + server.port);
 
@@ -157,6 +160,7 @@ const endPoolConfigJob = new cron.CronJob(
 const transferPoolWinnersJob = new cron.CronJob(
   "30 23 * * *",
   async () => {
+    if (!poolConfigAccount) return;
     console.log("transfer pool winners at 23:30 UTC.");
     const winner = await getWinner();
     if (!winner) return;
@@ -223,6 +227,11 @@ const handleRoutes = async (req: Request): Promise<Response> => {
         }
       );
     case "/poolConfig":
+      if (!poolConfigAccount)
+        return Response.json(
+          { error: "Pool config not found" },
+          { status: 404 }
+        );
       return handlePoolConfigRoute(poolConfigAccount);
 
     case "/poolDeposit":

@@ -5,12 +5,17 @@ import {
   type Points,
   type Deposits,
   type LeaderBoard,
+  type PoolConfigAccount,
 } from "../models/models";
-import type { PoolConfig } from "../sdk/poolConfig";
+
 import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
 import { calculateResult, fetchBirdeyeTokenPrices } from "../utils/helpers";
 
-export const handlePoolConfigRoute = (poolConfig: PoolConfig): Response => {
+export const handlePoolConfigRoute = async (): Promise<Response> => {
+  const poolConfigCollection = await db.collection<PoolConfigAccount>(
+    "poolConfigAccount"
+  );
+  const poolConfig = await poolConfigCollection.findOne();
   if (!poolConfig)
     return Response.json(
       {
@@ -21,17 +26,7 @@ export const handlePoolConfigRoute = (poolConfig: PoolConfig): Response => {
       }
     );
 
-  const data = {
-    poolState: poolConfig.poolState,
-    poolAddress: poolConfig.poolAddress,
-    poolAuthority: poolConfig.poolAuthority,
-    poolActiveMint: poolConfig.poolActiveMint,
-    poolDepositPerUser: poolConfig.poolDepositPerUser,
-    poolRoundWinAllocation: poolConfig.poolRoundWinAllocation,
-    squadsAuthorityPubkey: poolConfig.squadsAuthorityPubkey,
-    poolBalance: poolConfig.poolBalance,
-  };
-  return Response.json({ data }, { status: 200 });
+  return Response.json({ poolConfig }, { status: 200 });
 };
 
 export const handlePostPoolDeposit = async (pubkey: string, poolId: string) => {

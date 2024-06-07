@@ -9,8 +9,12 @@ import {
   type Deposits,
   type LeaderBoard,
   type Position,
+  type PoolConfigAccount,
 } from "../models/models";
 import { PROJECTS_TO_PLAY } from "./constants";
+import * as solana from "@solana/web3.js";
+import type { SDK } from "../sdk/sdk";
+import { PoolConfig } from "../sdk/poolConfig";
 
 export const getRouteEndpoint = (url: string): string => {
   let endpoint = url.split("/").pop();
@@ -303,4 +307,42 @@ export const getWinner = async () => {
   const winner = leaderBoardData[0];
 
   return winner.pubkey;
+};
+
+export const usePoolConfigChange = async (
+  poolConfig: PoolConfig | null,
+  sdk: SDK
+) => {
+  if (!sdk.connection || !poolConfig) return;
+
+  sdk.connection.onAccountChange(poolConfig.poolAddress, async (account) => {
+    const newPoolConfigAccount = await PoolConfig.fetch(
+      sdk,
+      poolConfig.poolAddress
+    );
+    const newPoolConfigDBAccount: PoolConfigAccount = {
+      poolState: newPoolConfigAccount.poolState,
+      poolAddress: newPoolConfigAccount.poolAddress.toBase58(),
+      poolAuthority: newPoolConfigAccount.poolAuthority.toBase58(),
+      poolActiveMint: newPoolConfigAccount.poolActiveMint.toBase58(),
+      poolDepositPerUser: newPoolConfigAccount.poolDepositPerUser,
+      poolRoundWinAllocation: newPoolConfigAccount.poolRoundWinAllocation,
+      squadsAuthorityPubkey:
+        newPoolConfigAccount.squadsAuthorityPubkey.toBase58(),
+      poolBalance: newPoolConfigAccount.poolBalance,
+      poolDepositsPaused: newPoolConfigAccount.poolDepositsPaused,
+    };
+    const poolConfigAccountCollection = await db.collection<PoolConfigAccount>(
+      "poolConfigAccount"
+    );
+    await poolConfigAccountCollection.replaceOne(
+      {
+        poolAddress: poolConfig.poolAddress,
+      },
+      newPoolConfigDBAccount,
+      {
+        upsert: true,
+      }
+    );
+  });
 };
