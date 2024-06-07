@@ -109,7 +109,7 @@ try {
 
 console.log("Server running on port" + " " + server.port);
 
-console.log("Server Time:" + new Date().toLocaleTimeString());
+console.log("Server Time:" + new Date().toISOString());
 
 const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
   await execCalculateLeaderBoardJob(poolId);
@@ -164,7 +164,7 @@ const transferPoolWinnersJob = cron.schedule("10 23 * * *", async () => {
 });
 
 const serverTime = cron.schedule("*/1 * * * *", () => {
-  console.log("Server Time:" + new Date().toLocaleTimeString());
+  console.log("Server Time:" + new Date().toISOString());
 });
 
 const handleRoutes = async (req: Request): Promise<Response> => {
