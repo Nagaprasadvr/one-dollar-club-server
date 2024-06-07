@@ -116,7 +116,7 @@ const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
 });
 
 const activatePoolConfigAndDepositsJob = cron.schedule(
-  "24 1 * * *",
+  "36 9 * * *",
   async () => {
     console.log("activate pool config and deposits  at 01:00 UTC.");
     poolId = await updateExistingPoolId();
@@ -131,7 +131,7 @@ const activatePoolConfigAndDepositsJob = cron.schedule(
   }
 );
 
-const pauseDepositsJob = cron.schedule("18 1 * * *", async () => {
+const pauseDepositsJob = cron.schedule("30 9 * * *", async () => {
   console.log("depoists paused at 22:00 UTC.");
   if (!poolConfigAccount) return;
   try {
@@ -141,7 +141,7 @@ const pauseDepositsJob = cron.schedule("18 1 * * *", async () => {
   }
 });
 
-const endPoolConfigJob = cron.schedule("20 1 * * *", async () => {
+const endPoolConfigJob = cron.schedule("32 9 * * *", async () => {
   calcLeaderBoardJob.stop();
   console.log(" inactivate pool config Job executed at 23:00 UTC.");
   if (!poolConfigAccount) return;
@@ -152,7 +152,7 @@ const endPoolConfigJob = cron.schedule("20 1 * * *", async () => {
   }
 });
 
-const transferPoolWinnersJob = cron.schedule("22 1 * * *", async () => {
+const transferPoolWinnersJob = cron.schedule("34 9 * * *", async () => {
   const winner = await getWinner();
   if (!winner) return;
   console.log("Winner", winner);
