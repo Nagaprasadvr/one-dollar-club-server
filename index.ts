@@ -122,66 +122,12 @@ const calcLeaderBoardJob = new cron.CronJob(
 );
 
 const pauseDepositsJob = new cron.CronJob(
-  "1 2 * * *",
+  "0 22 * * *",
   async () => {
     console.log("depoists paused at 22:00 UTC.");
     if (!poolConfigAccount) return;
     try {
       poolConfigAccount = await poolConfigAccount.pauseDeposit();
-    } catch (e) {
-      console.log("error2", e);
-    }
-  },
-  null,
-  true,
-  "UTC"
-);
-
-const endPoolConfigJob = new cron.CronJob(
-  "3 2 * * *",
-  async () => {
-    console.log(" inactivate pool config Job executed at 23:00 UTC.");
-    calcLeaderBoardJob.stop();
-    if (!poolConfigAccount) return;
-    try {
-      poolConfigAccount = await poolConfigAccount.pausePool();
-    } catch (e) {
-      console.log("error3", e);
-    }
-  },
-  null,
-  true,
-  "UTC"
-);
-
-const transferPoolWinnersJob = new cron.CronJob(
-  "5 2 * * *",
-  async () => {
-    console.log("transfer pool winners Job executed at 23:15 UTC.");
-    const winner = await getWinner();
-    if (!winner) return;
-    console.log("Winner", winner);
-    try {
-      poolConfigAccount = await poolConfigAccount.transferPoolWin(winner);
-    } catch (e) {
-      console.log("error4", e);
-    }
-  },
-  null,
-  true,
-  "UTC"
-);
-
-const activatePoolConfigAndDepositsJob = new cron.CronJob(
-  "7 2 * * *",
-  async () => {
-    console.log("activate pool config and deposits  at 01:00 UTC.");
-    poolId = await updateExistingPoolId();
-    if (!poolConfigAccount) return;
-    try {
-      poolConfigAccount = await poolConfigAccount.activatePool();
-      poolConfigAccount = await poolConfigAccount.activateDeposits();
-      calcLeaderBoardJob.start();
     } catch (e) {
       console.log("error1", e);
     }
@@ -191,9 +137,75 @@ const activatePoolConfigAndDepositsJob = new cron.CronJob(
   "UTC"
 );
 
-// const serverTime = new cron.schedule("*/1 * * * *", () => {
-//   console.log("Server Time:" + new Date().toISOString());
-// });
+const endPoolConfigJob = new cron.CronJob(
+  "0 23 * * *",
+  async () => {
+    console.log("inactivate pool config at 23:00 UTC.");
+    calcLeaderBoardJob.stop();
+    if (!poolConfigAccount) return;
+    try {
+      poolConfigAccount = await poolConfigAccount.pausePool();
+    } catch (e) {
+      console.log("error2", e);
+    }
+  },
+  null,
+  true,
+  "UTC"
+);
+
+const transferPoolWinnersJob = new cron.CronJob(
+  "30 23 * * *",
+  async () => {
+    console.log("transfer pool winners at 23:30 UTC.");
+    const winner = await getWinner();
+    if (!winner) return;
+    console.log("Winner", winner);
+    try {
+      poolConfigAccount = await poolConfigAccount.transferPoolWin(winner);
+    } catch (e) {
+      console.log("error3", e);
+    }
+  },
+  null,
+  true,
+  "UTC"
+);
+
+const activatePoolConfigJob = new cron.CronJob(
+  "0 0 * * *",
+  async () => {
+    console.log("activate poolConfig at 00:00 UTC.");
+    poolId = await updateExistingPoolId();
+    if (!poolConfigAccount) return;
+    try {
+      poolConfigAccount = await poolConfigAccount.activatePool();
+    } catch (e) {
+      console.log("error4", e);
+    }
+  },
+  null,
+  true,
+  "UTC"
+);
+
+const activatePoolDepositsJob = new cron.CronJob(
+  "0 1 * * *",
+  async () => {
+    console.log("activate pool deposits at 01:00 UTC.");
+
+    if (!poolConfigAccount) return;
+    try {
+      poolConfigAccount = await poolConfigAccount.activateDeposits();
+      calcLeaderBoardJob.start();
+    } catch (e) {
+      console.log("error5", e);
+    }
+  },
+  null,
+  true,
+  "UTC"
+);
 
 const handleRoutes = async (req: Request): Promise<Response> => {
   const route = urls.find((url) => url === getRouteEndpoint(req.url));
