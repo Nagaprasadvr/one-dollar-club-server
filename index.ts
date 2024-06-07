@@ -116,7 +116,7 @@ const calcLeaderBoardJob = cron.schedule("*/10 * * * *", async () => {
 });
 
 const activatePoolConfigAndDepositsJob = cron.schedule(
-  "36 9 * * *",
+  "40 9 * * *",
   async () => {
     console.log("activate pool config and deposits  at 01:00 UTC.");
     poolId = await updateExistingPoolId();
@@ -131,7 +131,7 @@ const activatePoolConfigAndDepositsJob = cron.schedule(
   }
 );
 
-const pauseDepositsJob = cron.schedule("30 9 * * *", async () => {
+const pauseDepositsJob = cron.schedule("35 9 * * *", async () => {
   console.log("depoists paused at 22:00 UTC.");
   if (!poolConfigAccount) return;
   try {
@@ -141,7 +141,7 @@ const pauseDepositsJob = cron.schedule("30 9 * * *", async () => {
   }
 });
 
-const endPoolConfigJob = cron.schedule("32 9 * * *", async () => {
+const endPoolConfigJob = cron.schedule("37 9 * * *", async () => {
   calcLeaderBoardJob.stop();
   console.log(" inactivate pool config Job executed at 23:00 UTC.");
   if (!poolConfigAccount) return;
@@ -152,7 +152,7 @@ const endPoolConfigJob = cron.schedule("32 9 * * *", async () => {
   }
 });
 
-const transferPoolWinnersJob = cron.schedule("34 9 * * *", async () => {
+const transferPoolWinnersJob = cron.schedule("39 9 * * *", async () => {
   const winner = await getWinner();
   if (!winner) return;
   console.log("Winner", winner);
@@ -163,9 +163,9 @@ const transferPoolWinnersJob = cron.schedule("34 9 * * *", async () => {
   }
 });
 
-const serverTime = cron.schedule("*/1 * * * *", () => {
-  console.log("Server Time:" + new Date().toISOString());
-});
+// const serverTime = cron.schedule("*/1 * * * *", () => {
+//   console.log("Server Time:" + new Date().toISOString());
+// });
 
 const handleRoutes = async (req: Request): Promise<Response> => {
   const route = urls.find((url) => url === getRouteEndpoint(req.url));
