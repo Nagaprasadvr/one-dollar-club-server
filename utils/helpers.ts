@@ -314,13 +314,11 @@ export const usePoolConfigChange = async (
   sdk: SDK
 ) => {
   if (!sdk.connection || !poolConfig) return;
-  console.log("poolConfig account changed");
   sdk.connection.onAccountChange(poolConfig.poolAddress, async (account) => {
     const newPoolConfigAccount = await PoolConfig.fetch(
       sdk,
       poolConfig.poolAddress
     );
-    console.log("newPoolConfig", newPoolConfigAccount.poolState);
     const newPoolConfigDBAccount: PoolConfigAccount = {
       poolState: newPoolConfigAccount.poolState,
       poolAddress: newPoolConfigAccount.poolAddress.toBase58(),
@@ -340,13 +338,12 @@ export const usePoolConfigChange = async (
     if (!poolConfigAccountData) {
       await poolConfigAccountCollection.insertOne(newPoolConfigDBAccount);
     } else {
-      const result = await poolConfigAccountCollection.updateOne(
+      await poolConfigAccountCollection.updateOne(
         {},
         {
           $set: newPoolConfigDBAccount,
         }
       );
-      console.log("result", result);
     }
   });
 };
