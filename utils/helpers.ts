@@ -320,7 +320,7 @@ export const usePoolConfigChange = async (
       sdk,
       poolConfig.poolAddress
     );
-    console.log("newPoolConfig", newPoolConfigAccount);
+    console.log("newPoolConfig", newPoolConfigAccount.poolState);
     const newPoolConfigDBAccount: PoolConfigAccount = {
       poolState: newPoolConfigAccount.poolState,
       poolAddress: newPoolConfigAccount.poolAddress.toBase58(),
