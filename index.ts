@@ -121,27 +121,8 @@ const calcLeaderBoardJob = new cron.CronJob(
   "UTC"
 );
 
-const activatePoolConfigAndDepositsJob = new cron.CronJob(
-  "56 1 * * *",
-  async () => {
-    console.log("activate pool config and deposits  at 01:00 UTC.");
-    poolId = await updateExistingPoolId();
-    if (!poolConfigAccount) return;
-    try {
-      poolConfigAccount = await poolConfigAccount.activatePool();
-      poolConfigAccount = await poolConfigAccount.activateDeposits();
-      calcLeaderBoardJob.start();
-    } catch (e) {
-      console.log("error1", e);
-    }
-  },
-  null,
-  true,
-  "UTC"
-);
-
 const pauseDepositsJob = new cron.CronJob(
-  "48 1 * * *",
+  "1 2 * * *",
   async () => {
     console.log("depoists paused at 22:00 UTC.");
     if (!poolConfigAccount) return;
@@ -157,10 +138,10 @@ const pauseDepositsJob = new cron.CronJob(
 );
 
 const endPoolConfigJob = new cron.CronJob(
-  "50 1 * * *",
+  "3 2 * * *",
   async () => {
-    calcLeaderBoardJob.stop();
     console.log(" inactivate pool config Job executed at 23:00 UTC.");
+    calcLeaderBoardJob.stop();
     if (!poolConfigAccount) return;
     try {
       poolConfigAccount = await poolConfigAccount.pausePool();
@@ -174,8 +155,9 @@ const endPoolConfigJob = new cron.CronJob(
 );
 
 const transferPoolWinnersJob = new cron.CronJob(
-  "54 1 * * *",
+  "5 2 * * *",
   async () => {
+    console.log("transfer pool winners Job executed at 23:15 UTC.");
     const winner = await getWinner();
     if (!winner) return;
     console.log("Winner", winner);
@@ -186,7 +168,27 @@ const transferPoolWinnersJob = new cron.CronJob(
     }
   },
   null,
-  true
+  true,
+  "UTC"
+);
+
+const activatePoolConfigAndDepositsJob = new cron.CronJob(
+  "7 2 * * *",
+  async () => {
+    console.log("activate pool config and deposits  at 01:00 UTC.");
+    poolId = await updateExistingPoolId();
+    if (!poolConfigAccount) return;
+    try {
+      poolConfigAccount = await poolConfigAccount.activatePool();
+      poolConfigAccount = await poolConfigAccount.activateDeposits();
+      calcLeaderBoardJob.start();
+    } catch (e) {
+      console.log("error1", e);
+    }
+  },
+  null,
+  true,
+  "UTC"
 );
 
 // const serverTime = new cron.schedule("*/1 * * * *", () => {
