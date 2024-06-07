@@ -316,7 +316,6 @@ export const usePoolConfigChange = async (
   if (!sdk.connection || !poolConfig) return;
 
   sdk.connection.onAccountChange(poolConfig.poolAddress, async (account) => {
-    console.log("Pool config account changed");
     const newPoolConfigAccount = await PoolConfig.fetch(
       sdk,
       poolConfig.poolAddress
