@@ -365,13 +365,6 @@ const handleRoutes = async (req: Request): Promise<Response> => {
       const passedPoolId = queryParams?.poolId;
       const date = queryParams?.date;
 
-      if (!passedPoolId && !date) {
-        return Response.json(
-          { error: "No poolId or date passed" },
-          { status: 400 }
-        );
-      }
-
       return await handleGetLeaderBoardHistory(date, passedPoolId);
   }
 };

@@ -546,12 +546,6 @@ export const handleGetLeaderBoardHistory = async (
     const leaderBoardHistoryCollection =
       await db.collection<LeaderBoardHistory>("leaderBoardHistory");
 
-    if (!date && !poolId) {
-      return Response.json(
-        { error: "Please provide date or poolId" },
-        { status: 400 }
-      );
-    }
     let query = {};
     if (date) {
       query = { date };
