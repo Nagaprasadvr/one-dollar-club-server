@@ -7,6 +7,7 @@ import {
   getRouteEndpoint,
   getWalletFromKeyPair,
   getWinner,
+  pushToLeaderBoardHistory,
   updateExistingPoolId,
   usePoolConfigChange,
 } from "./utils/helpers";
@@ -19,6 +20,7 @@ import { PoolConfig } from "./sdk/poolConfig";
 import os from "os";
 import {
   handleGetLeaderboard,
+  handleGetLeaderBoardHistory,
   handleGetPoints,
   handleGetPoolDeposits,
   handleGetPositions,
@@ -48,6 +50,7 @@ const urls: Urls[] = [
   "/leaderBoard",
   "/getPositionsStat",
   "/changePoolIdByAuthority",
+  "/getLeaderBoardHistory",
 ];
 
 const CORS_HEADERS = {
@@ -145,6 +148,7 @@ const endPoolConfigJob = new cron.CronJob(
   async () => {
     console.log("inactivate pool config at 23:00 UTC.");
     calcLeaderBoardJob.stop();
+    await pushToLeaderBoardHistory();
     if (!poolConfigAccount) return;
     try {
       poolConfigAccount = await poolConfigAccount.pausePool();
@@ -232,7 +236,7 @@ const handleRoutes = async (req: Request): Promise<Response> => {
           { error: "Pool config not found" },
           { status: 404 }
         );
-      return handlePoolConfigRoute(poolConfigAccount);
+      return handlePoolConfigRoute();
 
     case "/poolDeposit":
       switch (method) {
@@ -356,5 +360,18 @@ const handleRoutes = async (req: Request): Promise<Response> => {
       poolId = await updateExistingPoolId();
 
       return Response.json({ poolId }, { status: 200 });
+
+    case "/getLeaderBoardHistory":
+      const passedPoolId = queryParams?.poolId;
+      const date = queryParams?.date;
+
+      if (!passedPoolId && !date) {
+        return Response.json(
+          { error: "No poolId or date passed" },
+          { status: 400 }
+        );
+      }
+
+      return await handleGetLeaderBoardHistory(date, passedPoolId);
   }
 };

@@ -10,6 +10,7 @@ import {
   type LeaderBoard,
   type Position,
   type PoolConfigAccount,
+  type LeaderBoardHistory,
 } from "../models/models";
 import { PROJECTS_TO_PLAY } from "./constants";
 import * as solana from "@solana/web3.js";
@@ -346,4 +347,31 @@ export const usePoolConfigChange = async (
       );
     }
   });
+};
+
+export const pushToLeaderBoardHistory = async () => {
+  const leaderBoardHistoryCollection = await db.collection<LeaderBoardHistory>(
+    "leaderBoardHistory"
+  );
+  const leaderBoardCollection = await db.collection<LeaderBoard>("leaderBoard");
+
+  const leaderBoardData = await leaderBoardCollection.find({}).toArray();
+  if (leaderBoardData.length === 0) {
+    return;
+  }
+  const leaderBoardHistoryData: LeaderBoardHistory[] = leaderBoardData.map(
+    (leaderBoard, index) => {
+      return {
+        pubkey: leaderBoard.pubkey,
+        pointsAllocated: leaderBoard.pointsAllocated,
+        poolId: leaderBoard.poolId,
+        finalPoints: leaderBoard.finalPoints,
+        top3Positions: leaderBoard.top3Positions,
+        rank: index + 1,
+        date: new Date().toISOString(),
+      };
+    }
+  );
+
+  await leaderBoardHistoryCollection.insertMany(leaderBoardHistoryData);
 };

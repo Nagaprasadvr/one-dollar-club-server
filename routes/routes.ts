@@ -6,6 +6,7 @@ import {
   type Deposits,
   type LeaderBoard,
   type PoolConfigAccount,
+  type LeaderBoardHistory,
 } from "../models/models";
 
 import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
@@ -532,6 +533,42 @@ export const handleGetPositionsStat = async (
   } catch (e) {
     return Response.json(
       { error: "Error in getting positions" },
+      { status: 500 }
+    );
+  }
+};
+
+export const handleGetLeaderBoardHistory = async (
+  date?: string,
+  poolId?: string
+) => {
+  try {
+    const leaderBoardHistoryCollection =
+      await db.collection<LeaderBoardHistory>("leaderBoardHistory");
+
+    if (!date && !poolId) {
+      return Response.json(
+        { error: "Please provide date or poolId" },
+        { status: 400 }
+      );
+    }
+    let query = {};
+    if (date) {
+      query = { date };
+    }
+    if (poolId) {
+      query = { ...query, poolId };
+    }
+    const leaderBoardHistory = await leaderBoardHistoryCollection
+      .find(query)
+      .toArray();
+    if (leaderBoardHistory.length === 0) {
+      return Response.json({ message: "No data found" }, { status: 200 });
+    }
+    return Response.json({ data: leaderBoardHistory }, { status: 200 });
+  } catch (e) {
+    return Response.json(
+      { error: "Error in getting leaderboard" },
       { status: 500 }
     );
   }

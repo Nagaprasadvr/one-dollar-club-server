@@ -11,7 +11,8 @@ export type Urls =
   | "/poolCreatePositions"
   | "/leaderBoard"
   | "/getPositionsStat"
-  | "/changePoolIdByAuthority";
+  | "/changePoolIdByAuthority"
+  | "/getLeaderBoardHistory";
 
 export type RequestMethods = "GET" | "POST" | "PUT" | "DELETE";
 export interface BirdeyeTokenPriceData {

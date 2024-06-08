@@ -50,3 +50,13 @@ export type PoolConfigAccount = {
   poolBalance: number;
   poolDepositsPaused: boolean;
 };
+
+export type LeaderBoardHistory = {
+  pubkey: string;
+  pointsAllocated: number;
+  poolId: string;
+  finalPoints: number;
+  top3Positions: string;
+  rank: number;
+  date: string;
+};
