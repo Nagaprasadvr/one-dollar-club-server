@@ -21,7 +21,7 @@ export class PoolConfig {
     this.poolAddress = data.poolAddress;
     this.poolAuthority = data.poolAuthority;
     this.poolActiveMint = data.poolActiveMint;
-    this.poolDepositPerUser = data.poolDepositPerUser;
+    this.poolDepositPerUser = Number(data.poolDepositPerUser);
     this.poolRoundWinAllocation = data.poolRoundWinAllocation;
     this.squadsAuthorityPubkey = data.squadsAuthorityPubkey;
     this.poolBalance = data.poolBalance;
