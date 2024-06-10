@@ -1,6 +1,7 @@
 import * as cron from "cron";
 import type { RequestMethods, Urls } from "./utils/types";
 import {
+  deleteLiveLeaderBoardData,
   execCalculateLeaderBoardJob,
   fetchAndSetPoolId,
   getQueryParams,
@@ -185,6 +186,7 @@ const activatePoolConfigJob = new cron.CronJob(
   async () => {
     console.log("activate poolConfig at 00:00 UTC.");
     poolId = await updateExistingPoolId();
+    await deleteLiveLeaderBoardData();
     if (!poolConfigAccount) return;
     try {
       poolConfigAccount = await poolConfigAccount.activatePool();

@@ -107,8 +107,27 @@ export const safeDivide = (a: number, b: number) => {
 };
 
 export const calculateResult = (result: PositionResult) => {
-  const { entryPrice, leverage, currentPrice, pointsAllocated, positionType } =
-    result;
+  const {
+    entryPrice,
+    leverage,
+    currentPrice,
+    pointsAllocated,
+    positionType,
+    liquidationPrice,
+  } = result;
+
+  switch (positionType) {
+    case "long":
+      if (currentPrice < liquidationPrice) {
+        return 0;
+      }
+      break;
+    case "short":
+      if (currentPrice > liquidationPrice) {
+        return 0;
+      }
+      break;
+  }
 
   const pointsPerEntryPrice = safeDivide(pointsAllocated, entryPrice);
 
@@ -374,4 +393,19 @@ export const pushToLeaderBoardHistory = async () => {
   );
 
   await leaderBoardHistoryCollection.insertMany(leaderBoardHistoryData);
+};
+
+export const deleteLiveLeaderBoardData = async () => {
+  try {
+    const leaderBoardCollection = await db.collection<LeaderBoard>(
+      "leaderBoard"
+    );
+    const leaderBoardData = await leaderBoardCollection.find({}).toArray();
+    if (leaderBoardData.length === 0) {
+      return;
+    }
+    await leaderBoardCollection.deleteMany({});
+  } catch (e) {
+    console.log(e);
+  }
 };
