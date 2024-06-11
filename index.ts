@@ -22,6 +22,7 @@ import os from "os";
 import {
   handleGetLeaderboard,
   handleGetLeaderBoardHistory,
+  handleGetLeaderBoardLastUpdated,
   handleGetPoints,
   handleGetPoolDeposits,
   handleGetPositions,
@@ -52,6 +53,7 @@ const urls: Urls[] = [
   "/getPositionsStat",
   "/changePoolIdByAuthority",
   "/getLeaderBoardHistory",
+  "/getLeaderBoardLastUpdated",
 ];
 
 const CORS_HEADERS = {
@@ -368,5 +370,12 @@ const handleRoutes = async (req: Request): Promise<Response> => {
       const date = queryParams?.date;
 
       return await handleGetLeaderBoardHistory(date, passedPoolId);
+
+    case "/getLeaderBoardLastUpdated":
+      let passedPoolId1 = queryParams?.poolId;
+      if (!passedPoolId1) {
+        passedPoolId1 = poolId;
+      }
+      return await handleGetLeaderBoardLastUpdated(passedPoolId1);
   }
 };

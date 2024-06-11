@@ -11,6 +11,7 @@ import {
   type Position,
   type PoolConfigAccount,
   type LeaderBoardHistory,
+  type LeaderBoardLastUpdated,
 } from "../models/models";
 import { PROJECTS_TO_PLAY } from "./constants";
 import * as solana from "@solana/web3.js";
@@ -189,7 +190,7 @@ export const getAllPositions = async (poolId: string) => {
 
 export const execCalculateLeaderBoardJob = async (poolId: string) => {
   try {
-    console.log("Calculating leader board");
+    console.log("Calculating leader board at " + new Date().toUTCString());
     const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
     const tokenPrices = await fetchBirdeyeTokenPrices(tokenAddressArray);
     if (tokenPrices.length === 0) {
@@ -268,11 +269,37 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       .sort((a, b) => b.finalPoints - a.finalPoints)
       .slice(0, 10);
 
+    const leaderBoardLastUpdatedCollection =
+      await db.collection<LeaderBoardLastUpdated>("leaderBoardLastUpdated");
+
     if (leaderBoardDbData.length === 0) {
       await leaderBoardCollection.insertMany(top10LeaderBoard);
     } else {
       await leaderBoardCollection.deleteMany({});
       await leaderBoardCollection.insertMany(top10LeaderBoard);
+    }
+
+    const leaderBoardLastUpdatedData =
+      await leaderBoardLastUpdatedCollection.findOne({
+        poolId,
+      });
+
+    if (!leaderBoardLastUpdatedData) {
+      await leaderBoardLastUpdatedCollection.insertOne({
+        poolId,
+        lastUpdatedTs: Math.ceil(Date.now() / 1000),
+      });
+    } else {
+      await leaderBoardLastUpdatedCollection.updateOne(
+        {
+          poolId,
+        },
+        {
+          $set: {
+            lastUpdatedTs: Math.ceil(Date.now() / 1000),
+          },
+        }
+      );
     }
   } catch (e) {
     console.log(e);

@@ -39,6 +39,11 @@ export type PoolConfigId = {
   lastUpdatedTs: number;
 };
 
+export type LeaderBoardLastUpdated = {
+  poolId: string;
+  lastUpdatedTs: number;
+};
+
 export type PoolConfigAccount = {
   poolState: PoolState;
   poolAddress: string;

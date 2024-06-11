@@ -7,6 +7,8 @@ import {
   type LeaderBoard,
   type PoolConfigAccount,
   type LeaderBoardHistory,
+  type PoolConfigId,
+  type LeaderBoardLastUpdated,
 } from "../models/models";
 
 import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
@@ -563,6 +565,25 @@ export const handleGetLeaderBoardHistory = async (
   } catch (e) {
     return Response.json(
       { error: "Error in getting leaderboard" },
+      { status: 500 }
+    );
+  }
+};
+
+export const handleGetLeaderBoardLastUpdated = async (poolId: string) => {
+  try {
+    const leaderBoardLastUpdatedCollection =
+      await db.collection<LeaderBoardLastUpdated>("leaderBoardLastUpdated");
+
+    const leaderBoardLastUpdated =
+      await leaderBoardLastUpdatedCollection.findOne({ poolId });
+    if (!leaderBoardLastUpdated) {
+      return Response.json({ message: "No data found" }, { status: 200 });
+    }
+    return Response.json({ data: leaderBoardLastUpdated }, { status: 200 });
+  } catch (e) {
+    return Response.json(
+      { error: "Error in getting leaderboardLastUpdated" },
       { status: 500 }
     );
   }
