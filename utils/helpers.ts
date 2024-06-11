@@ -285,11 +285,13 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       });
 
     if (!leaderBoardLastUpdatedData) {
+      console.log("Inserting leader board last updated");
       await leaderBoardLastUpdatedCollection.insertOne({
         poolId,
         lastUpdatedTs: Math.ceil(Date.now() / 1000),
       });
     } else {
+      console.log("Updating leader board last updated");
       await leaderBoardLastUpdatedCollection.updateOne(
         {
           poolId,
