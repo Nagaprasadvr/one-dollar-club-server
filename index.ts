@@ -119,7 +119,7 @@ console.log("Server running on port" + " " + server.port);
 console.log("Server Time:" + new Date().toISOString());
 
 const calcLeaderBoardJob = new cron.CronJob(
-  "*/10 * * * *",
+  "*/5 * * * *",
   async () => {
     await execCalculateLeaderBoardJob(poolId);
   },
