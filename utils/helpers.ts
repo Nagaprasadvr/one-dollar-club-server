@@ -246,13 +246,17 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       .toArray();
 
     console.log("Leaderboard data", leaderBoardDbData);
+    console.log("Positions", positions);
 
     for (const player of players) {
+      console.log("player", player);
       const playerPositions = positions.filter(
         (position) => position.pubkey === player
       );
       console.log("Player positions", playerPositions);
-      if (playerPositions.length === 0) return;
+      if (playerPositions.length === 0) {
+        continue;
+      }
       const totalPointsAllocated = playerPositions.reduce(
         (acc, position) => acc + position.pointsAllocated,
         0
