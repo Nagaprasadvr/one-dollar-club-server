@@ -227,12 +227,10 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
     const positions = await getAllPositions(poolId);
 
     if (deposits.length === 0 || positions.length === 0) {
-      console.log("No deposits or positions found");
       return;
     }
 
     const players = deposits.map((deposit) => deposit.pubkey);
-    console.log("Players", players);
 
     const leaderBoardData: LeaderBoard[] = [];
     const leaderBoardCollection = await db.collection<LeaderBoard>(
@@ -245,15 +243,10 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       })
       .toArray();
 
-    console.log("Leaderboard data", leaderBoardDbData);
-    console.log("Positions", positions);
-
     for (const player of players) {
-      console.log("player", player);
       const playerPositions = positions.filter(
         (position) => position.pubkey === player
       );
-      console.log("Player positions", playerPositions);
       if (playerPositions.length === 0) {
         continue;
       }
@@ -303,7 +296,7 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
     const top10LeaderBoard = leaderBoardData
       .sort((a, b) => b.finalPoints - a.finalPoints)
       .slice(0, 10);
-    console.log("Top 10 leaderboard", top10LeaderBoard);
+
     if (leaderBoardDbData.length === 0) {
       await leaderBoardCollection.insertMany(top10LeaderBoard);
     } else {
