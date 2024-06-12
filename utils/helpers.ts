@@ -190,7 +190,6 @@ export const getAllPositions = async (poolId: string) => {
 
 export const execCalculateLeaderBoardJob = async (poolId: string) => {
   try {
-    console.log("Calculating leader board at " + new Date().toUTCString());
     const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
     const tokenPrices = await fetchBirdeyeTokenPrices(tokenAddressArray);
     if (tokenPrices.length === 0) {
@@ -268,7 +267,7 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
     const top10LeaderBoard = leaderBoardData
       .sort((a, b) => b.finalPoints - a.finalPoints)
       .slice(0, 10);
-
+    console.log("Calculating leader board at " + new Date().toUTCString());
     const leaderBoardLastUpdatedCollection =
       await db.collection<LeaderBoardLastUpdated>("leaderBoardLastUpdated");
 
