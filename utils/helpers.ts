@@ -227,10 +227,12 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
     const positions = await getAllPositions(poolId);
 
     if (deposits.length === 0 || positions.length === 0) {
+      console.log("No deposits or positions found");
       return;
     }
 
     const players = deposits.map((deposit) => deposit.pubkey);
+    console.log("Players", players);
 
     const leaderBoardData: LeaderBoard[] = [];
     const leaderBoardCollection = await db.collection<LeaderBoard>(
@@ -242,6 +244,8 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
         poolId,
       })
       .toArray();
+
+    console.log("Leaderboard data", leaderBoardDbData);
 
     for (const player of players) {
       const playerPositions = positions.filter(
