@@ -251,6 +251,7 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       const playerPositions = positions.filter(
         (position) => position.pubkey === player
       );
+      console.log("Player positions", playerPositions);
       if (playerPositions.length === 0) return;
       const totalPointsAllocated = playerPositions.reduce(
         (acc, position) => acc + position.pointsAllocated,
@@ -298,7 +299,7 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
     const top10LeaderBoard = leaderBoardData
       .sort((a, b) => b.finalPoints - a.finalPoints)
       .slice(0, 10);
-
+    console.log("Top 10 leaderboard", top10LeaderBoard);
     if (leaderBoardDbData.length === 0) {
       await leaderBoardCollection.insertMany(top10LeaderBoard);
     } else {
