@@ -190,6 +190,33 @@ export const getAllPositions = async (poolId: string) => {
 
 export const execCalculateLeaderBoardJob = async (poolId: string) => {
   try {
+    console.log("Calculating leader board at " + new Date().toUTCString());
+    const leaderBoardLastUpdatedCollection =
+      await db.collection<LeaderBoardLastUpdated>("leaderBoardLastUpdated");
+    const leaderBoardLastUpdatedData =
+      await leaderBoardLastUpdatedCollection.findOne({
+        poolId,
+      });
+
+    if (!leaderBoardLastUpdatedData) {
+      console.log("Inserting leader board last updated");
+      await leaderBoardLastUpdatedCollection.insertOne({
+        poolId,
+        lastUpdatedTs: Math.ceil(Date.now() / 1000),
+      });
+    } else {
+      console.log("Updating leader board last updated");
+      await leaderBoardLastUpdatedCollection.updateOne(
+        {
+          poolId,
+        },
+        {
+          $set: {
+            lastUpdatedTs: Math.ceil(Date.now() / 1000),
+          },
+        }
+      );
+    }
     const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
     const tokenPrices = await fetchBirdeyeTokenPrices(tokenAddressArray);
     if (tokenPrices.length === 0) {
@@ -267,40 +294,12 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
     const top10LeaderBoard = leaderBoardData
       .sort((a, b) => b.finalPoints - a.finalPoints)
       .slice(0, 10);
-    console.log("Calculating leader board at " + new Date().toUTCString());
-    const leaderBoardLastUpdatedCollection =
-      await db.collection<LeaderBoardLastUpdated>("leaderBoardLastUpdated");
 
     if (leaderBoardDbData.length === 0) {
       await leaderBoardCollection.insertMany(top10LeaderBoard);
     } else {
       await leaderBoardCollection.deleteMany({});
       await leaderBoardCollection.insertMany(top10LeaderBoard);
-    }
-
-    const leaderBoardLastUpdatedData =
-      await leaderBoardLastUpdatedCollection.findOne({
-        poolId,
-      });
-
-    if (!leaderBoardLastUpdatedData) {
-      console.log("Inserting leader board last updated");
-      await leaderBoardLastUpdatedCollection.insertOne({
-        poolId,
-        lastUpdatedTs: Math.ceil(Date.now() / 1000),
-      });
-    } else {
-      console.log("Updating leader board last updated");
-      await leaderBoardLastUpdatedCollection.updateOne(
-        {
-          poolId,
-        },
-        {
-          $set: {
-            lastUpdatedTs: Math.ceil(Date.now() / 1000),
-          },
-        }
-      );
     }
   } catch (e) {
     console.log(e);
