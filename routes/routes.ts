@@ -588,3 +588,21 @@ export const handleGetLeaderBoardLastUpdated = async (poolId: string) => {
     );
   }
 };
+
+export const handleGetTotalGamesPlayed = async (poolId: string) => {
+  try {
+    const poolConfigIdCollection = await db.collection<PoolConfigId>(
+      "poolConfigId"
+    );
+    const poolConfigId = await poolConfigIdCollection.findOne({ poolId });
+    if (!poolConfigId) {
+      return Response.json({ message: "No data found" }, { status: 200 });
+    }
+    return Response.json({ data: poolConfigId.gamesPlayed }, { status: 200 });
+  } catch (e) {
+    return Response.json(
+      { error: "Error in getting total games played" },
+      { status: 500 }
+    );
+  }
+};

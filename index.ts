@@ -27,6 +27,7 @@ import {
   handleGetPoolDeposits,
   handleGetPositions,
   handleGetPositionsStat,
+  handleGetTotalGamesPlayed,
   handleIsAllowedToPlay,
   handlePoolConfigRoute,
   handlePostCreatePosition,
@@ -54,6 +55,7 @@ const urls: Urls[] = [
   "/changePoolIdByAuthority",
   "/getLeaderBoardHistory",
   "/getLeaderBoardLastUpdated",
+  "/poolGamesPlayed",
 ];
 
 const CORS_HEADERS = {
@@ -377,5 +379,8 @@ const handleRoutes = async (req: Request): Promise<Response> => {
         passedPoolId1 = poolId;
       }
       return await handleGetLeaderBoardLastUpdated(passedPoolId1);
+
+    case "/poolGamesPlayed":
+      return await handleGetTotalGamesPlayed(poolId);
   }
 };

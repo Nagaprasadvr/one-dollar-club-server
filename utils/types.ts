@@ -13,7 +13,8 @@ export type Urls =
   | "/getPositionsStat"
   | "/changePoolIdByAuthority"
   | "/getLeaderBoardHistory"
-  | "/getLeaderBoardLastUpdated";
+  | "/getLeaderBoardLastUpdated"
+  | "/poolGamesPlayed";
 
 export type RequestMethods = "GET" | "POST" | "PUT" | "DELETE";
 export interface BirdeyeTokenPriceData {
