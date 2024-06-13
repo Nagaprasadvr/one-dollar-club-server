@@ -36,6 +36,7 @@ export type LeaderBoard = {
 
 export type PoolConfigId = {
   poolId: string;
+  gamesPlayed: number;
   lastUpdatedTs: number;
 };
 

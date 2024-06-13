@@ -318,6 +318,7 @@ export const fetchAndSetPoolId = async () => {
     await poolConfigIdCollection.insertOne({
       poolId,
       lastUpdatedTs: Math.ceil(Date.now() / 1000),
+      gamesPlayed: 0,
     });
     return poolId;
   }
@@ -341,6 +342,7 @@ export const updateExistingPoolId = async () => {
       $set: {
         poolId: newPoolId,
         lastUpdatedTs: Math.ceil(Date.now() / 1000),
+        gamesPlayed: poolConfigIdData.gamesPlayed + 1,
       },
     }
   );
