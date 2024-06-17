@@ -16,7 +16,11 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { SDK } from "./sdk/sdk";
-import { authHash, HELIUS_DEVNET_RPC_ENDPOINT } from "./utils/constants";
+import {
+  authHash,
+  HELIUS_MAINNET_RPC_ENDPOINT,
+  MAINNET_POOL_CONFIG_PUBKEY,
+} from "./utils/constants";
 import { PoolConfig } from "./sdk/poolConfig";
 import os from "os";
 import {
@@ -76,7 +80,7 @@ const keypairFile = fs.readFileSync(SERVER_KEYAPIR_PATH, "utf-8");
 const keypair = Keypair.fromSecretKey(new Uint8Array(JSON.parse(keypairFile)));
 const wallet = getWalletFromKeyPair(keypair);
 
-const connection = new Connection(HELIUS_DEVNET_RPC_ENDPOINT, "confirmed");
+const connection = new Connection(HELIUS_MAINNET_RPC_ENDPOINT, "confirmed");
 
 const sdk = new SDK(connection, wallet, {
   commitment: "confirmed",
@@ -86,10 +90,7 @@ const poolActiveMint = new PublicKey(
   "31nhKDV3WudEC8Nfwa8sfPiGq9FEeXknSmDZTSKQiru1"
 );
 
-const poolConfigAddress = new PublicKey(
-  "7d9QiPPQ4q9DV4UyLS3j9ZSR71NRwCQ4NMYeHaCkXByz"
-);
-
+const poolConfigAddress = new PublicKey(MAINNET_POOL_CONFIG_PUBKEY);
 const server = Bun.serve({
   port: 4000,
   fetch: async (req, server) => {

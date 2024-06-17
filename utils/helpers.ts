@@ -13,7 +13,11 @@ import {
   type LeaderBoardHistory,
   type LeaderBoardLastUpdated,
 } from "../models/models";
-import { PROJECTS_TO_PLAY } from "./constants";
+import {
+  HELIUS_MAINNET_RPC_ENDPOINT,
+  PROJECTS_TO_PLAY,
+  TOKEN_GATED_NFTS_COLLECTION_PUBKEY_MAP,
+} from "./constants";
 import * as solana from "@solana/web3.js";
 import type { SDK } from "../sdk/sdk";
 import { PoolConfig } from "../sdk/poolConfig";
@@ -436,6 +440,37 @@ export const deleteLiveLeaderBoardData = async () => {
       return;
     }
     await leaderBoardCollection.deleteMany({});
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const searchNFTAssets = async (owner: string) => {
+  try {
+    const response = await fetch(HELIUS_MAINNET_RPC_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: "tokenGate",
+        method: "searchAssets",
+        params: {
+          ownerAddress: owner,
+          grouping: [
+            "collection",
+            TOKEN_GATED_NFTS_COLLECTION_PUBKEY_MAP.map(
+              (collection) => collection.collectionAddress
+            ),
+          ],
+          page: 1, // Starts at 1
+          limit: 1,
+        },
+      }),
+    });
+    const { result } = await response.json();
+    return result;
   } catch (e) {
     console.log(e);
   }

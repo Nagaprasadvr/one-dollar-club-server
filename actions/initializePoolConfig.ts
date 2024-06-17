@@ -3,20 +3,21 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 import { SDK } from "../sdk/sdk";
 import { PoolConfig } from "../sdk/poolConfig";
 import * as anchor from "@coral-xyz/anchor";
-import { HELIUS_DEVNET_RPC_ENDPOINT } from "../utils/constants";
+import {
+  BONK_MAINNET_MINT,
+  HELIUS_MAINNET_RPC_ENDPOINT,
+} from "../utils/constants";
 import os from "os";
 import fs from "fs";
 import { getWalletFromKeyPair } from "../utils/helpers";
 
 export const initializePoolConfig = async () => {
   const homeDir = os.homedir();
-  const poolActiveMint = new PublicKey(
-    "31nhKDV3WudEC8Nfwa8sfPiGq9FEeXknSmDZTSKQiru1"
-  );
+  const poolActiveMint = new PublicKey(BONK_MAINNET_MINT);
   const squadsPubkey = new PublicKey(
-    "CNiF4Y8VdsA7aMftkF6kumEBz67AsCAyvnZDr6zopYSC"
+    "AsM97N16ejpKcVJTwEWtnLsDMz7jFPGr6SU1vzJD9xZt"
   );
-  const poolDepositPerUser = 50_000;
+  const poolDepositPerUser = 40_000;
   const poolRoundWinAllocation = 0.5;
   const poolConfig = Keypair.generate();
   const SERVER_KEYAPIR_PATH = `${homeDir}/.config/solana/id.json`;
@@ -26,7 +27,9 @@ export const initializePoolConfig = async () => {
   );
   const wallet = getWalletFromKeyPair(keypair);
   const sdk = new SDK(
-    new anchor.web3.Connection(HELIUS_DEVNET_RPC_ENDPOINT),
+    new anchor.web3.Connection(
+      "https://rpc.hellomoon.io/f1c9764a-5e99-4e75-ada7-fee44b2d5571"
+    ),
     wallet,
     {}
   );

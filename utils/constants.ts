@@ -3,8 +3,11 @@ import { PublicKey } from "@solana/web3.js";
 export const HELIUS_DEVNET_RPC_ENDPOINT =
   "https://devnet.helius-rpc.com/?api-key=52d3aae3-07be-4900-a393-49d36a260649";
 
+export const HELIUS_MAINNET_RPC_ENDPOINT =
+  "https://mainnet.helius-rpc.com/?api-key=52d3aae3-07be-4900-a393-49d36a260649";
+
 export const POOL_AUTH_PUBKEY = new PublicKey(
-  "CNiF4Y8VdsA7aMftkF6kumEBz67AsCAyvnZDr6zopYSC"
+  "AsM97N16ejpKcVJTwEWtnLsDMz7jFPGr6SU1vzJD9xZt"
 );
 
 export const MAX_POINTS = 100;
@@ -46,3 +49,20 @@ export const PROJECTS_TO_PLAY = [
 
 export const authHash =
   "d92931b0e7b0296e08bd4cccfe59beceb3f554f01f9630b99152de09b3435ebb";
+
+export const TOKEN_GATED_NFTS = ["Saga Monkes"];
+
+export const TOKEN_GATED_NFTS_COLLECTION_PUBKEY_MAP = [
+  {
+    name: "Saga Monkes",
+    collectionAddress: "GokAiStXz2Kqbxwz2oqzfEXuUhE7aXySmBGEP7uejKXF",
+  },
+];
+
+export const BONK_MAINNET_MINT = "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263";
+export const BONK_DEVNET_MINT = "31nhKDV3WudEC8Nfwa8sfPiGq9FEeXknSmDZTSKQiru1";
+export const MAINNET_POOL_CONFIG_PUBKEY =
+  "4NGsmgPxgdZtw9F6hbZdWFQbFq7zMbGKi3Jt9ZKQqgQA";
+
+export const DEVNET_POOL_CONFIG_PUBKEY =
+  "7d9QiPPQ4q9DV4UyLS3j9ZSR71NRwCQ4NMYeHaCkXByz";
