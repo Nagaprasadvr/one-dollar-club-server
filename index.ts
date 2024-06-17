@@ -4,10 +4,12 @@ import {
   deleteLiveLeaderBoardData,
   execCalculateLeaderBoardJob,
   fetchAndSetPoolId,
+  getPoolConfigAccountFromCollection,
   getQueryParams,
   getRouteEndpoint,
   getWalletFromKeyPair,
   getWinner,
+  insertToPoolConfigAccount,
   pushToLeaderBoardHistory,
   updateExistingPoolId,
   usePoolConfigChange,
@@ -18,6 +20,7 @@ import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { SDK } from "./sdk/sdk";
 import {
   authHash,
+  BONK_MAINNET_MINT,
   HELIUS_MAINNET_RPC_ENDPOINT,
   MAINNET_POOL_CONFIG_PUBKEY,
 } from "./utils/constants";
@@ -86,9 +89,7 @@ const sdk = new SDK(connection, wallet, {
   commitment: "confirmed",
 });
 
-const poolActiveMint = new PublicKey(
-  "31nhKDV3WudEC8Nfwa8sfPiGq9FEeXknSmDZTSKQiru1"
-);
+const poolActiveMint = new PublicKey(BONK_MAINNET_MINT);
 
 const poolConfigAddress = new PublicKey(MAINNET_POOL_CONFIG_PUBKEY);
 const server = Bun.serve({
@@ -113,6 +114,10 @@ const server = Bun.serve({
 let poolConfigAccount: PoolConfig | null = null;
 try {
   poolConfigAccount = await PoolConfig.fetch(sdk, poolConfigAddress);
+  const poolConfigAccountDb = await getPoolConfigAccountFromCollection();
+  if (!poolConfigAccountDb && poolConfigAccount) {
+    await insertToPoolConfigAccount(poolConfigAccount);
+  }
 } catch (e) {
   console.log("error");
 }

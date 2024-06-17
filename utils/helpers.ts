@@ -475,3 +475,37 @@ export const searchNFTAssets = async (owner: string) => {
     console.log(e);
   }
 };
+
+export const getPoolConfigAccountFromCollection = async () => {
+  const poolConfigAccountCollection = await db.collection<PoolConfigAccount>(
+    "poolConfigAccount"
+  );
+  const poolConfigAccountData = await poolConfigAccountCollection.findOne({});
+  if (!poolConfigAccountData) {
+    return null;
+  }
+  return poolConfigAccountData;
+};
+
+export const insertToPoolConfigAccount = async (
+  newPoolConfigAccount: PoolConfig
+) => {
+  const poolConfigAccountCollection = await db.collection<PoolConfigAccount>(
+    "poolConfigAccount"
+  );
+  const poolConfigAccountData = await poolConfigAccountCollection.findOne({});
+  if (poolConfigAccountData) return;
+  const newPoolConfigDBAccount: PoolConfigAccount = {
+    poolState: newPoolConfigAccount.poolState,
+    poolAddress: newPoolConfigAccount.poolAddress.toBase58(),
+    poolAuthority: newPoolConfigAccount.poolAuthority.toBase58(),
+    poolActiveMint: newPoolConfigAccount.poolActiveMint.toBase58(),
+    poolDepositPerUser: newPoolConfigAccount.poolDepositPerUser,
+    poolRoundWinAllocation: newPoolConfigAccount.poolRoundWinAllocation,
+    squadsAuthorityPubkey:
+      newPoolConfigAccount.squadsAuthorityPubkey.toBase58(),
+    poolBalance: newPoolConfigAccount.poolBalance,
+    poolDepositsPaused: newPoolConfigAccount.poolDepositsPaused,
+  };
+  await poolConfigAccountCollection.insertOne(newPoolConfigDBAccount);
+};
