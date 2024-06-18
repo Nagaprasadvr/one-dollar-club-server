@@ -244,13 +244,11 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       });
 
     if (!leaderBoardLastUpdatedData) {
-      console.log("Inserting leader board last updated");
       await leaderBoardLastUpdatedCollection.insertOne({
         poolId,
         lastUpdatedTs: Math.ceil(Date.now() / 1000),
       });
     } else {
-      console.log("Updating leader board last updated");
       await leaderBoardLastUpdatedCollection.updateOne(
         {
           poolId,
@@ -267,8 +265,6 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
     if (tokenPrices.length === 0) {
       return;
     }
-
-    console.log("Token prices fetched", tokenPrices);
 
     const deposits = await getAllDeposits(poolId);
     const positions = await getAllPositions(poolId);
@@ -294,7 +290,6 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       const playerPositions = positions.filter(
         (position) => position.pubkey === player
       );
-      console.log("positions", playerPositions);
       if (playerPositions.length === 0) {
         continue;
       }
@@ -341,8 +336,6 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
           .map((position) => position.tokenName)
           .join(","),
       });
-
-      console.log("resulting leader board data", resultingPositions);
     }
 
     const top10LeaderBoard = leaderBoardData

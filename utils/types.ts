@@ -28,3 +28,9 @@ export interface BirdeyeTokenPriceData {
 export type EstimatedPriorityFee = {
   microLamports: number;
 } | null;
+
+export type Project = {
+  name: string;
+  mint: string;
+  logoURI: string;
+};
