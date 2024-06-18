@@ -1,7 +1,7 @@
 import { Wallet } from "@coral-xyz/anchor";
 
 import type { Keypair } from "@solana/web3.js";
-import type { BirdeyeTokenPriceData } from "./types";
+import type { BirdeyeTokenPriceData, EstimatedPriorityFee } from "./types";
 import axios from "axios";
 import db from "../db/connection";
 import {
@@ -14,6 +14,8 @@ import {
   type LeaderBoardLastUpdated,
 } from "../models/models";
 import {
+  DEFAULT_COMPUTE_UNIT_PRICE_ML,
+  DEFAULT_COMPUTE_UNITS_OFFSET,
   HELIUS_MAINNET_RPC_ENDPOINT,
   PROJECTS_TO_PLAY,
   TOKEN_GATED_NFTS_COLLECTION_PUBKEY_MAP,
@@ -61,6 +63,45 @@ export const generatePoolId = (): string => {
 };
 
 export const fetchBirdeyeTokenPrices = async (tokenAddressArray: string[]) => {
+  const BIRDEYE_BASE_URL = "https://public-api.birdeye.so/defi";
+  const birdeyeApiKey = process.env.BIRDEYE_API_KEY;
+  const headers = {
+    "X-API-KEY": birdeyeApiKey,
+  };
+
+  if (!tokenAddressArray || tokenAddressArray?.length === 0) {
+    return [];
+  }
+  try {
+    const tokenNamesJoined = tokenAddressArray.join("%2C");
+    const response = await axios.get(
+      `${BIRDEYE_BASE_URL}/multi_price?list_address=${tokenNamesJoined}`,
+      {
+        headers: headers,
+      }
+    );
+    const tokenDataObject = response.data.data;
+    const tokensPrices: BirdeyeTokenPriceData[] = Object.keys(
+      tokenDataObject
+    ).map((tokenAddress) => {
+      const tokenData = tokenDataObject[tokenAddress];
+      return {
+        address: tokenAddress,
+        value: tokenData.value,
+        updateUnixTime: tokenData.updateUnixTime,
+        updateHumanTime: tokenData.updateHumanTime,
+        priceChange24h: tokenData.priceChange24h,
+      };
+    });
+    return tokensPrices;
+  } catch (e) {
+    return [];
+  }
+};
+
+export const fetchBirdeyeTokenPericesFallback = async (
+  tokenAddressArray: string[]
+) => {
   const BIRDEYE_BASE_URL = "https://public-api.birdeye.so/defi";
   const birdeyeApiKey = process.env.BIRDEYE_API_KEY;
   const headers = {
@@ -508,4 +549,143 @@ export const insertToPoolConfigAccount = async (
     poolDepositsPaused: newPoolConfigAccount.poolDepositsPaused,
   };
   await poolConfigAccountCollection.insertOne(newPoolConfigDBAccount);
+};
+
+export const getEstimatedPriorityFee = async (
+  sdk: SDK
+): Promise<EstimatedPriorityFee> => {
+  try {
+    const recentPriorityFeeData =
+      await sdk.connection.getRecentPrioritizationFees();
+
+    if (recentPriorityFeeData.length === 0) {
+      return null;
+    }
+    let avgPriorityFee = recentPriorityFeeData.reduce(
+      (acc, { prioritizationFee }) => acc + prioritizationFee,
+      0
+    );
+    avgPriorityFee /= recentPriorityFeeData.length;
+    avgPriorityFee = Math.ceil(avgPriorityFee);
+
+    return {
+      microLamports: avgPriorityFee,
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getComputeUnitsToBeConsumed = async (
+  tx: solana.Transaction,
+  connection: solana.Connection
+) => {
+  try {
+    const latestBlockhash = await connection.getLatestBlockhash();
+    const ixs = tx.instructions;
+    if (!tx.feePayer) {
+      return null;
+    }
+    const txMessage = new solana.TransactionMessage({
+      payerKey: tx.feePayer,
+      recentBlockhash: latestBlockhash.blockhash,
+      instructions: ixs,
+    }).compileToV0Message();
+
+    const versionedTx = new solana.VersionedTransaction(txMessage);
+    const simulateTxResult = await connection.simulateTransaction(versionedTx, {
+      sigVerify: false,
+    });
+    const unitsConsumed = simulateTxResult.value?.unitsConsumed;
+    if (!unitsConsumed) {
+      throw new Error("Failed to get units consumed");
+    }
+    return unitsConsumed + DEFAULT_COMPUTE_UNITS_OFFSET;
+  } catch (error) {
+    return null;
+  }
+};
+
+export async function expirationRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 2
+): Promise<T> {
+  if (maxRetries === 0) return await fn();
+  let retryCount = 0;
+
+  while (retryCount < maxRetries) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (!isTransactionExpiredBlockheightExceededError(error)) throw error;
+      retryCount++;
+      console.error(`Attempt ${retryCount + 1} tx expired. Retrying...`);
+    }
+  }
+  throw new Error("Max Tx Expiration retries exceeded");
+}
+
+function isTransactionExpiredBlockheightExceededError(error: unknown) {
+  return (
+    error instanceof Error &&
+    error.message.includes("TransactionExpiredBlockheightExceededError")
+  );
+}
+
+export const sendAndConTxWithComputePriceAndRetry = async (
+  ix: solana.TransactionInstruction,
+  sdk: SDK
+) => {
+  const fn = async () => {
+    const latestBlockHash = await sdk.connection.getLatestBlockhash();
+
+    // let computeUnitsNeeded = await getComputeUnitsToBeConsumed(
+    //   tx,
+    //   sdk.connection
+    // );
+    // if (!computeUnitsNeeded) {
+    //   computeUnitsNeeded = DEFAULT_COMPUTE_UNIT_LIMIT;
+    // }
+
+    // let estimatedPriorityFee = await getEstimatedPriorityFee(sdk);
+    // if (!estimatedPriorityFee) {
+    //   estimatedPriorityFee = {
+    //     microLamports: DEFAULT_COMPUTE_UNIT_PRICE_ML,
+    //   };
+    // }
+
+    const computeUnitPriceIx = solana.ComputeBudgetProgram.setComputeUnitPrice({
+      microLamports: DEFAULT_COMPUTE_UNIT_PRICE_ML,
+    });
+    // const computeUnitsLimitIx = solana.ComputeBudgetProgram.setComputeUnitLimit(
+    //   {
+    //     units: computeUnitsNeeded,
+    //   }
+    // );
+
+    const txMessage = new solana.TransactionMessage({
+      payerKey: sdk.wallet.payer.publicKey,
+      recentBlockhash: latestBlockHash.blockhash,
+      instructions: [computeUnitPriceIx, ix],
+    }).compileToV0Message();
+
+    const versionedTx = new solana.VersionedTransaction(txMessage);
+
+    versionedTx.sign([sdk.wallet.payer]);
+
+    const sig = await sdk.connection.sendTransaction(versionedTx);
+
+    await sdk.connection.confirmTransaction({
+      signature: sig,
+      lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+      blockhash: latestBlockHash.blockhash,
+    });
+
+    return sig;
+  };
+  try {
+    return await expirationRetry(fn, 2);
+  } catch (e) {
+    return null;
+  }
 };

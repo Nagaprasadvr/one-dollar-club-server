@@ -24,3 +24,7 @@ export interface BirdeyeTokenPriceData {
   updateHumanTime: string;
   priceChange24h: number;
 }
+
+export type EstimatedPriorityFee = {
+  microLamports: number;
+} | null;

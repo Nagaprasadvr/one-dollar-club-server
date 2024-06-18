@@ -3,6 +3,7 @@ import type { PoolState } from "./types";
 import type { RawPoolConfig, SDK } from "./sdk";
 import * as solana from "@solana/web3.js";
 import * as spl from "@solana/spl-token";
+import { sendAndConTxWithComputePriceAndRetry } from "../utils/helpers";
 
 export class PoolConfig {
   private sdk: SDK;
@@ -39,26 +40,28 @@ export class PoolConfig {
   }
 
   async pauseDeposit(): Promise<PoolConfig> {
-    const sig = await this.sdk.program.methods
+    const ix = await this.sdk.program.methods
       .pauseDeposits()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
         poolConfig: this.poolAddress,
       })
-      .rpc();
+      .instruction();
+    const sig = await sendAndConTxWithComputePriceAndRetry(ix, this.sdk);
 
     console.log("pauseDeposit sig", sig);
     return this.reload();
   }
 
   async pausePool(): Promise<PoolConfig> {
-    const sig = await this.sdk.program.methods
+    const ix = await this.sdk.program.methods
       .pausePoolState()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
         poolConfig: this.poolAddress,
       })
-      .rpc();
+      .instruction();
+    const sig = await sendAndConTxWithComputePriceAndRetry(ix, this.sdk);
     console.log("pausePool sig", sig);
     return this.reload();
   }
@@ -72,7 +75,7 @@ export class PoolConfig {
     poolConfig: solana.Keypair,
     poolActiveMint: PublicKey
   ) {
-    await sdk.program.methods
+    const ix = await sdk.program.methods
       .initializeConfig(
         poolDepositPerUser,
         poolRoundWinAllocation,
@@ -85,43 +88,49 @@ export class PoolConfig {
         systemProgram: solana.SystemProgram.programId,
       })
       .signers([poolConfig])
-      .rpc();
+      .instruction();
+
+    const sig = await sendAndConTxWithComputePriceAndRetry(ix, sdk);
   }
 
   async activatePool(): Promise<PoolConfig> {
-    const sig = await this.sdk.program.methods
+    const ix = await this.sdk.program.methods
       .activatePoolState()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
         poolConfig: this.poolAddress,
       })
-      .rpc();
+      .instruction();
 
+    const sig = await sendAndConTxWithComputePriceAndRetry(ix, this.sdk);
     console.log("activatePool sig", sig);
     return this.reload();
   }
 
   async activateDeposits(): Promise<PoolConfig> {
-    const sig = await this.sdk.program.methods
+    const ix = await this.sdk.program.methods
       .resumeDeposits()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
         poolConfig: this.poolAddress,
       })
-      .rpc();
+      .instruction();
+    const sig = await sendAndConTxWithComputePriceAndRetry(ix, this.sdk);
     console.log("activateDeposits sig", sig);
     return this.reload();
   }
 
   async changeMint(newMint: PublicKey): Promise<PoolConfig> {
-    const sig = await this.sdk.program.methods
+    const ix = await this.sdk.program.methods
       .changeMint()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
         poolConfig: this.poolAddress,
         mint: newMint,
       })
-      .rpc();
+      .instruction();
+
+    const sig = await sendAndConTxWithComputePriceAndRetry(ix, this.sdk);
 
     console.log("changeMint sig", sig);
     return this.reload();
@@ -145,7 +154,7 @@ export class PoolConfig {
       this.poolAuthority
     );
 
-    const sig = await this.sdk.program.methods
+    const ix = await this.sdk.program.methods
       .transferWinAllocation()
       .accountsStrict({
         poolAuthority: this.poolAuthority,
@@ -159,9 +168,9 @@ export class PoolConfig {
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         systemProgram: solana.SystemProgram.programId,
       })
-      .rpc({
-        commitment: "confirmed",
-      });
+      .instruction();
+
+    const sig = await sendAndConTxWithComputePriceAndRetry(ix, this.sdk);
 
     console.log("transferPoolWin sig", sig);
     return this.reload();
