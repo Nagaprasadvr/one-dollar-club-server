@@ -1,7 +1,7 @@
 import { Wallet } from "@coral-xyz/anchor";
 
 import type { Keypair } from "@solana/web3.js";
-import type { BirdeyeTokenPriceData, EstimatedPriorityFee } from "./types";
+import type { EstimatedPriorityFee } from "./types";
 import axios from "axios";
 import db from "../db/connection";
 import {
@@ -12,6 +12,8 @@ import {
   type PoolConfigAccount,
   type LeaderBoardHistory,
   type LeaderBoardLastUpdated,
+  type BirdeyeTokenPriceData,
+  type BirdeyeTokenPriceLastUpdated,
 } from "../models/models";
 import {
   DEFAULT_COMPUTE_UNIT_PRICE_ML,
@@ -261,11 +263,15 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       );
     }
     const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
-    const tokenPrices = await fetchBirdeyeTokenPrices(tokenAddressArray);
+    const tokenPrices = await fetchBirdeyeTokenPericesFallback(
+      tokenAddressArray
+    );
+
+    console.log("Token prices fetched", tokenPrices);
     if (tokenPrices.length === 0) {
       return;
     }
-
+    await storeBirdEyeTokenPriceData(tokenPrices);
     const deposits = await getAllDeposits(poolId);
     const positions = await getAllPositions(poolId);
 
@@ -687,5 +693,96 @@ export const sendAndConTxWithComputePriceAndRetry = async (
     return await expirationRetry(fn, 2);
   } catch (e) {
     return null;
+  }
+};
+
+export const fetchTokenPriceFallback = async (tokenAddressArray: string[]) => {
+  try {
+    if (!tokenAddressArray || tokenAddressArray?.length === 0) {
+      return [];
+    }
+
+    const tokenPrices = await Promise.all(
+      tokenAddressArray.map(async (tokenAddress) => {
+        return await fetchIndividualTokenPrice(tokenAddress);
+      })
+    );
+
+    return tokenPrices;
+  } catch (e) {
+    return [];
+  }
+};
+
+export const fetchIndividualTokenPrice = async (
+  tokenAddress: string
+): Promise<BirdeyeTokenPriceData> => {
+  const BIRDEYE_BASE_URL = "https://public-api.birdeye.so/price";
+  const birdeyeApiKey = process.env.BIRDEYE_API_KEY;
+  const headers = {
+    "X-API-KEY": birdeyeApiKey,
+  };
+
+  try {
+    const response = await axios.get(
+      `${BIRDEYE_BASE_URL}?address=${tokenAddress}`,
+      {
+        headers: headers,
+      }
+    );
+    const tokenData = response.data.data;
+    return {
+      address: tokenAddress,
+      value: tokenData.value,
+      updateUnixTime: tokenData.updateUnixTime,
+      updateHumanTime: tokenData.updateHumanTime,
+    };
+  } catch (e) {
+    return {
+      address: tokenAddress,
+      value: 0,
+      updateUnixTime: 0,
+      updateHumanTime: "",
+    };
+  }
+};
+
+export const storeBirdEyeTokenPriceData = async (
+  tokenPrices: BirdeyeTokenPriceData[]
+) => {
+  const birdeyeTokenPriceCollection =
+    await db.collection<BirdeyeTokenPriceData>("birdeyeTokenPrice");
+
+  const birdeyeTokenPriceLastUpdated =
+    await db.collection<BirdeyeTokenPriceLastUpdated>(
+      "birdeyeTokenPriceLastUpdated"
+    );
+
+  const birdeyeTokenPriceLastUpdatedData =
+    await birdeyeTokenPriceLastUpdated.findOne({});
+
+  if (!birdeyeTokenPriceLastUpdatedData) {
+    await birdeyeTokenPriceLastUpdated.insertOne({
+      lastUpdatedTs: Math.ceil(Date.now() / 1000),
+    });
+  } else {
+    await birdeyeTokenPriceLastUpdated.updateOne(
+      {},
+      {
+        $set: {
+          lastUpdatedTs: Math.ceil(Date.now() / 1000),
+        },
+      }
+    );
+  }
+  const birdeyeTokenPriceData = await birdeyeTokenPriceCollection
+    .find({})
+    .toArray();
+
+  if (birdeyeTokenPriceData.length === 0) {
+    await birdeyeTokenPriceCollection.insertMany(tokenPrices);
+  } else {
+    await birdeyeTokenPriceCollection.deleteMany({});
+    await birdeyeTokenPriceCollection.insertMany(tokenPrices);
   }
 };

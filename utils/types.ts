@@ -17,13 +17,6 @@ export type Urls =
   | "/poolGamesPlayed";
 
 export type RequestMethods = "GET" | "POST" | "PUT" | "DELETE";
-export interface BirdeyeTokenPriceData {
-  address: string;
-  value: number;
-  updateUnixTime: number;
-  updateHumanTime: string;
-  priceChange24h: number;
-}
 
 export type EstimatedPriorityFee = {
   microLamports: number;

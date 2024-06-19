@@ -77,10 +77,13 @@ export type NFTOwnership = {
   nftCollections: NFTCollection[];
 };
 
-export type BirdeyeTokenPrice = {
+export type BirdeyeTokenPriceData = {
   address: string;
   value: number;
   updateUnixTime: number;
   updateHumanTime: string;
-  priceChange24h: number;
+};
+
+export type BirdeyeTokenPriceLastUpdated = {
+  lastUpdatedTs: number;
 };
