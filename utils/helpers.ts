@@ -680,7 +680,7 @@ export const fetchBirdeyeTokenPriceFallback = async (
 export const fetchIndividualTokenPrice = async (
   tokenAddress: string
 ): Promise<BirdeyeTokenPriceData> => {
-  const BIRDEYE_BASE_URL = "https://public-api.birdeye.so/price";
+  const BIRDEYE_BASE_URL = "https://public-api.birdeye.so/defi/price";
   const birdeyeApiKey = process.env.BIRDEYE_API_KEY;
   const headers = {
     "X-API-KEY": birdeyeApiKey,
