@@ -64,42 +64,42 @@ export const generatePoolId = (): string => {
   return poolId;
 };
 
-export const fetchBirdeyeTokenPrices = async (tokenAddressArray: string[]) => {
-  const BIRDEYE_BASE_URL = "https://public-api.birdeye.so/defi";
-  const birdeyeApiKey = process.env.BIRDEYE_API_KEY;
-  const headers = {
-    "X-API-KEY": birdeyeApiKey,
-  };
+// export const fetchBirdeyeTokenPrices = async (tokenAddressArray: string[]) => {
+//   const BIRDEYE_BASE_URL = "https://public-api.birdeye.so/defi";
+//   const birdeyeApiKey = process.env.BIRDEYE_API_KEY;
+//   const headers = {
+//     "X-API-KEY": birdeyeApiKey,
+//   };
 
-  if (!tokenAddressArray || tokenAddressArray?.length === 0) {
-    return [];
-  }
-  try {
-    const tokenNamesJoined = tokenAddressArray.join("%2C");
-    const response = await axios.get(
-      `${BIRDEYE_BASE_URL}/multi_price?list_address=${tokenNamesJoined}`,
-      {
-        headers: headers,
-      }
-    );
-    const tokenDataObject = response.data.data;
-    const tokensPrices: BirdeyeTokenPriceData[] = Object.keys(
-      tokenDataObject
-    ).map((tokenAddress) => {
-      const tokenData = tokenDataObject[tokenAddress];
-      return {
-        address: tokenAddress,
-        value: tokenData.value,
-        updateUnixTime: tokenData.updateUnixTime,
-        updateHumanTime: tokenData.updateHumanTime,
-        priceChange24h: tokenData.priceChange24h,
-      };
-    });
-    return tokensPrices;
-  } catch (e) {
-    return [];
-  }
-};
+//   if (!tokenAddressArray || tokenAddressArray?.length === 0) {
+//     return [];
+//   }
+//   try {
+//     const tokenNamesJoined = tokenAddressArray.join("%2C");
+//     const response = await axios.get(
+//       `${BIRDEYE_BASE_URL}/multi_price?list_address=${tokenNamesJoined}`,
+//       {
+//         headers: headers,
+//       }
+//     );
+//     const tokenDataObject = response.data.data;
+//     const tokensPrices: BirdeyeTokenPriceData[] = Object.keys(
+//       tokenDataObject
+//     ).map((tokenAddress) => {
+//       const tokenData = tokenDataObject[tokenAddress];
+//       return {
+//         address: tokenAddress,
+//         value: tokenData.value,
+//         updateUnixTime: tokenData.updateUnixTime,
+//         updateHumanTime: tokenData.updateHumanTime,
+//         priceChange24h: tokenData.priceChange24h,
+//       };
+//     });
+//     return tokensPrices;
+//   } catch (e) {
+//     return [];
+//   }
+// };
 
 type PositionResult = {
   entryPrice: number;

@@ -14,7 +14,10 @@ import {
 } from "../models/models";
 
 import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
-import { calculateResult, fetchBirdeyeTokenPrices } from "../utils/helpers";
+import {
+  calculateResult,
+  fetchBirdeyeTokenPriceFallback,
+} from "../utils/helpers";
 
 export const handlePoolConfigRoute = async (): Promise<Response> => {
   const poolConfigCollection = await db.collection<PoolConfigAccount>(
@@ -466,7 +469,7 @@ export const handleGetPositionsStat = async (
 ) => {
   try {
     const projectsToPlay = PROJECTS_TO_PLAY.map((project) => project.mint);
-    const tokenPrice = await fetchBirdeyeTokenPrices(projectsToPlay);
+    const tokenPrice = await fetchBirdeyeTokenPriceFallback(projectsToPlay);
 
     const positionCollection = await db.collection<Position>("position");
     const positions = await positionCollection
