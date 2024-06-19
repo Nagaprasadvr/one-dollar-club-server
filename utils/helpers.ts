@@ -101,45 +101,6 @@ export const fetchBirdeyeTokenPrices = async (tokenAddressArray: string[]) => {
   }
 };
 
-export const fetchBirdeyeTokenPericesFallback = async (
-  tokenAddressArray: string[]
-) => {
-  const BIRDEYE_BASE_URL = "https://public-api.birdeye.so/defi";
-  const birdeyeApiKey = process.env.BIRDEYE_API_KEY;
-  const headers = {
-    "X-API-KEY": birdeyeApiKey,
-  };
-
-  if (!tokenAddressArray || tokenAddressArray?.length === 0) {
-    return [];
-  }
-  try {
-    const tokenNamesJoined = tokenAddressArray.join("%2C");
-    const response = await axios.get(
-      `${BIRDEYE_BASE_URL}/multi_price?list_address=${tokenNamesJoined}`,
-      {
-        headers: headers,
-      }
-    );
-    const tokenDataObject = response.data.data;
-    const tokensPrices: BirdeyeTokenPriceData[] = Object.keys(
-      tokenDataObject
-    ).map((tokenAddress) => {
-      const tokenData = tokenDataObject[tokenAddress];
-      return {
-        address: tokenAddress,
-        value: tokenData.value,
-        updateUnixTime: tokenData.updateUnixTime,
-        updateHumanTime: tokenData.updateHumanTime,
-        priceChange24h: tokenData.priceChange24h,
-      };
-    });
-    return tokensPrices;
-  } catch (e) {
-    return [];
-  }
-};
-
 type PositionResult = {
   entryPrice: number;
   leverage: number;
@@ -263,9 +224,7 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       );
     }
     const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
-    const tokenPrices = await fetchBirdeyeTokenPericesFallback(
-      tokenAddressArray
-    );
+    const tokenPrices = await fetchBirdeyeTokenPriceFallback(tokenAddressArray);
 
     console.log("Token prices fetched", tokenPrices);
     if (tokenPrices.length === 0) {
@@ -696,7 +655,9 @@ export const sendAndConTxWithComputePriceAndRetry = async (
   }
 };
 
-export const fetchTokenPriceFallback = async (tokenAddressArray: string[]) => {
+export const fetchBirdeyeTokenPriceFallback = async (
+  tokenAddressArray: string[]
+) => {
   try {
     if (!tokenAddressArray || tokenAddressArray?.length === 0) {
       return [];
