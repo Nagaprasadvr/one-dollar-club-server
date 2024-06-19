@@ -224,10 +224,9 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       );
     }
     const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
-    console.log("Fetching token prices before");
+
     const tokenPrices = await fetchBirdeyeTokenPriceFallback(tokenAddressArray);
 
-    console.log("Token prices fetched", tokenPrices);
     if (tokenPrices.length === 0) {
       return;
     }

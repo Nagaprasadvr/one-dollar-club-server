@@ -9,6 +9,8 @@ import {
   type LeaderBoardHistory,
   type PoolConfigId,
   type LeaderBoardLastUpdated,
+  type BirdeyeTokenPriceData,
+  type BirdeyeTokenPriceLastUpdated,
 } from "../models/models";
 
 import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
@@ -436,16 +438,6 @@ export const handleGetPoints = async (pubkey: string, poolId: string) => {
   }
 };
 
-export const hanldeGetBirdeyeTokenPrices = async () => {
-  try {
-    const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
-    const tokenPrices = await fetchBirdeyeTokenPrices(tokenAddressArray);
-    return Response.json({ data: tokenPrices }, { status: 200 });
-  } catch (e) {
-    return Response.json({ error: "Error in getting prices" }, { status: 500 });
-  }
-};
-
 export const handleGetLeaderboard = async (poolId: string) => {
   try {
     const leaderboardCollection = await db.collection<LeaderBoard>(
@@ -604,5 +596,37 @@ export const handleGetTotalGamesPlayed = async (poolId: string) => {
       { error: "Error in getting total games played" },
       { status: 500 }
     );
+  }
+};
+
+export const hanldeGetBirdeyeTokenPrices = async () => {
+  try {
+    const birdeyeTokenPriceCollection =
+      await db.collection<BirdeyeTokenPriceData>("birdeyeTokenPrice");
+
+    const tokenPrices =
+      (await birdeyeTokenPriceCollection.find().toArray()) ?? [];
+
+    return Response.json({ data: tokenPrices }, { status: 200 });
+  } catch (e) {
+    return Response.json({ error: "Error in getting prices" }, { status: 500 });
+  }
+};
+
+export const handleGetBirdeyeTokenPriceLastUpdated = async () => {
+  try {
+    const birdeyeTokenPriceLastUpdatedCollection =
+      await db.collection<BirdeyeTokenPriceLastUpdated>(
+        "birdeyeTokenPriceLastUpdated"
+      );
+
+    const tokenPriceLastUpdated =
+      await birdeyeTokenPriceLastUpdatedCollection.findOne();
+    if (!tokenPriceLastUpdated) {
+      return Response.json({ message: "No data found" }, { status: 200 });
+    }
+    return Response.json({ data: tokenPriceLastUpdated }, { status: 200 });
+  } catch (e) {
+    return Response.json({ error: "Error in getting prices" }, { status: 500 });
   }
 };

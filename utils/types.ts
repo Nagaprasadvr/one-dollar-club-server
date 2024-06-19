@@ -14,7 +14,9 @@ export type Urls =
   | "/changePoolIdByAuthority"
   | "/getLeaderBoardHistory"
   | "/getLeaderBoardLastUpdated"
-  | "/poolGamesPlayed";
+  | "/poolGamesPlayed"
+  | "/getBirdeyeTokenPrices"
+  | "/getBirdeyeTokenPriceLastUpdated";
 
 export type RequestMethods = "GET" | "POST" | "PUT" | "DELETE";
 

@@ -40,6 +40,8 @@ import {
   handlePostCreatePosition,
   handlePostCreatePositions,
   handlePostPoolDeposit,
+  handleGetBirdeyeTokenPriceLastUpdated,
+  hanldeGetBirdeyeTokenPrices,
 } from "./routes/routes";
 
 dotenv.config({
@@ -63,6 +65,8 @@ const urls: Urls[] = [
   "/getLeaderBoardHistory",
   "/getLeaderBoardLastUpdated",
   "/poolGamesPlayed",
+  "/getBirdeyeTokenPrices",
+  "/getBirdeyeTokenPriceLastUpdated",
 ];
 
 const CORS_HEADERS = {
@@ -388,5 +392,11 @@ const handleRoutes = async (req: Request): Promise<Response> => {
 
     case "/poolGamesPlayed":
       return await handleGetTotalGamesPlayed(poolId);
+
+    case "/getBirdeyeTokenPrices":
+      return await hanldeGetBirdeyeTokenPrices();
+
+    case "/getBirdeyeTokenPriceLastUpdated":
+      return await handleGetBirdeyeTokenPriceLastUpdated();
   }
 };
