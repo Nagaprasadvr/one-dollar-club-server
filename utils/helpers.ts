@@ -224,6 +224,7 @@ export const execCalculateLeaderBoardJob = async (poolId: string) => {
       );
     }
     const tokenAddressArray = PROJECTS_TO_PLAY.map((project) => project.mint);
+    console.log("Fetching token prices before");
     const tokenPrices = await fetchBirdeyeTokenPriceFallback(tokenAddressArray);
 
     console.log("Token prices fetched", tokenPrices);
@@ -671,6 +672,7 @@ export const fetchBirdeyeTokenPriceFallback = async (
 
     return tokenPrices;
   } catch (e) {
+    console.error("token price err:=", e);
     return [];
   }
 };
@@ -699,6 +701,7 @@ export const fetchIndividualTokenPrice = async (
       updateHumanTime: tokenData.updateHumanTime,
     };
   } catch (e) {
+    console.error("token price err ind", e);
     return {
       address: tokenAddress,
       value: 0,
