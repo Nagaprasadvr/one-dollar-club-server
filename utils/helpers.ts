@@ -652,6 +652,7 @@ export const sendAndConTxWithComputePriceAndRetry = async (
   try {
     return await expirationRetry(fn, retries);
   } catch (e) {
+    console.log("err", e);
     return null;
   }
 };

@@ -172,7 +172,6 @@ export class PoolConfig {
 
     const sig = await sendAndConTxWithComputePriceAndRetry(ix, this.sdk);
 
-    console.log("transferPoolWin sig", sig);
     return this.reload();
   }
 }
