@@ -98,4 +98,11 @@ export const NFTGatedTokens = [
     imageUrl:
       "https://shdw-drive.genesysgo.net/9DEPA5HdWF9aWYuwWB6cpnT7exK7Cpw7WvDwx8qe9GqT/8983.png",
   },
+  {
+    name: "Saga genesis token",
+    symbol: "SAGAGEN",
+    collectionAddress: "Aprj5bdWrgNNpk3uUbvqWfu3CrE27LmpnXaE4X3SyjMb",
+    imageUrl:
+      "https://api.underdog-data.com/jsondata/46pcSL5gmjBrPqGKFaLbbCmR6iVuLJbnQy13hAe7s6CC",
+  },
 ];
