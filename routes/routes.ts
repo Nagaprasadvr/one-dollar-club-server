@@ -676,7 +676,8 @@ export const handleGetBirdeyeTokenPriceLastUpdated = async () => {
 
 export const handleVerifyNFTOwnership = async (
   owner: string,
-  collectionAddress: string
+  collectionAddress: string,
+  poolId: string
 ) => {
   try {
     const validOwnerPubkey = PublicKey.isOnCurve(owner);
@@ -719,6 +720,12 @@ export const handleVerifyNFTOwnership = async (
         searchedNFT.symbol,
         searchedNFT.name
       );
+      const pointsCollection = await db.collection<Points>("points");
+      await pointsCollection.insertOne({
+        pubkey: owner,
+        pointsRemaining: MAX_POINTS,
+        poolId,
+      });
       return Response.json({ message: "NFT verified" }, { status: 200 });
     }
     return Response.json(

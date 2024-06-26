@@ -420,7 +420,8 @@ const handleRoutes = async (req: Request): Promise<Response> => {
 
       return await handleVerifyNFTOwnership(
         String(owner),
-        String(nftCollectionAddress1)
+        String(nftCollectionAddress1),
+        poolId
       );
 
     case "/getVerifiedNFT":
