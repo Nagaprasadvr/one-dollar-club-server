@@ -78,15 +78,6 @@ export const PROJECTS_TO_PLAY: Project[] = [
 export const authHash =
   "d92931b0e7b0296e08bd4cccfe59beceb3f554f01f9630b99152de09b3435ebb";
 
-export const TOKEN_GATED_NFTS = ["Saga Monkes"];
-
-export const TOKEN_GATED_NFTS_COLLECTION_PUBKEY_MAP = [
-  {
-    name: "Saga Monkes",
-    collectionAddress: "GokAiStXz2Kqbxwz2oqzfEXuUhE7aXySmBGEP7uejKXF",
-  },
-];
-
 export const BONK_MAINNET_MINT = "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263";
 export const BONK_DEVNET_MINT = "31nhKDV3WudEC8Nfwa8sfPiGq9FEeXknSmDZTSKQiru1";
 export const MAINNET_POOL_CONFIG_PUBKEY =
@@ -98,3 +89,11 @@ export const DEVNET_POOL_CONFIG_PUBKEY =
 export const DEFAULT_COMPUTE_UNIT_PRICE_ML = 1_000_000;
 export const DEFAULT_COMPUTE_UNITS_OFFSET = 100;
 export const DEFAULT_COMPUTE_UNIT_LIMIT = 2_000_000;
+
+export const NFTGatedTokens = [
+  {
+    name: "Saga Monkes",
+    symbol: "MONKE",
+    collectionAddress: "GokAiStXz2Kqbxwz2oqzfEXuUhE7aXySmBGEP7uejKXF",
+  },
+];

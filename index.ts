@@ -42,6 +42,8 @@ import {
   handlePostPoolDeposit,
   handleGetBirdeyeTokenPriceLastUpdated,
   hanldeGetBirdeyeTokenPrices,
+  handleGetVerifyNFTOwnership,
+  handleVerifyNFTOwnership,
 } from "./routes/routes";
 
 dotenv.config({
@@ -67,6 +69,8 @@ const urls: Urls[] = [
   "/poolGamesPlayed",
   "/getBirdeyeTokenPrices",
   "/getBirdeyeTokenPriceLastUpdated",
+  "/verifyNFT",
+  "/getVerifiedNFT",
 ];
 
 const CORS_HEADERS = {
@@ -398,5 +402,36 @@ const handleRoutes = async (req: Request): Promise<Response> => {
 
     case "/getBirdeyeTokenPriceLastUpdated":
       return await handleGetBirdeyeTokenPriceLastUpdated();
+
+    case "/verifyNFT":
+      const reqJson3 = await req.json();
+      if (!reqJson3) {
+        return Response.json({ error: "No body" }, { status: 400 });
+      }
+      const owner = reqJson3?.owner;
+      const nftCollectionAddress1 = reqJson3?.nftCollectionAddress;
+
+      if (!owner || !nftCollectionAddress1) {
+        return Response.json(
+          { error: "No owner or nftCollectionAddress" },
+          { status: 400 }
+        );
+      }
+
+      return await handleVerifyNFTOwnership(
+        String(owner),
+        String(nftCollectionAddress1)
+      );
+
+    case "/getVerifiedNFT":
+      const nftOwner = queryParams?.pubkey;
+      if (!nftOwner) {
+        return Response.json({ error: "No pubkey" }, { status: 400 });
+      }
+      const nftCollectionAddress2 = queryParams?.nftCollectionAddress;
+      return await handleGetVerifyNFTOwnership(
+        String(nftOwner),
+        nftCollectionAddress2
+      );
   }
 };

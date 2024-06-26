@@ -67,14 +67,11 @@ export type LeaderBoardHistory = {
   date: string;
 };
 
-export type NFTCollection = {
-  name: string;
-  collectionAddress: string;
-};
-
 export type NFTOwnership = {
   owner: string;
-  nftCollections: NFTCollection[];
+  nftCollectionAddress: string;
+  nftSymbol: string;
+  nftName: string;
 };
 
 export type BirdeyeTokenPriceData = {

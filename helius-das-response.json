@@ -1,0 +1,127 @@
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "total": 1,
+    "limit": 1000,
+    "page": 1,
+    "items": [
+      {
+        "interface": "V1_NFT",
+        "id": "6Jb6fnEVRXrSZJ3MrofJYiqvZVTJtapThqXxkif98AZV",
+        "content": {
+          "$schema": "https://schema.metaplex.com/nft1.0.json",
+          "json_uri": "https://shdw-drive.genesysgo.net/9DEPA5HdWF9aWYuwWB6cpnT7exK7Cpw7WvDwx8qe9GqT/5228.json",
+          "files": [
+            {
+              "uri": "https://shdw-drive.genesysgo.net/9DEPA5HdWF9aWYuwWB6cpnT7exK7Cpw7WvDwx8qe9GqT/5228.png",
+              "cdn_uri": "https://cdn.helius-rpc.com/cdn-cgi/image//https://shdw-drive.genesysgo.net/9DEPA5HdWF9aWYuwWB6cpnT7exK7Cpw7WvDwx8qe9GqT/5228.png",
+              "mime": "image/png"
+            }
+          ],
+          "metadata": {
+            "attributes": [
+              {
+                "value": "Saga",
+                "trait_type": "Background"
+              },
+              {
+                "value": "Dark",
+                "trait_type": "Fur"
+              },
+              {
+                "value": "HazMonke",
+                "trait_type": "Clothing"
+              },
+              {
+                "value": "OwO",
+                "trait_type": "Mouth"
+              },
+              {
+                "value": "Trainer Cap",
+                "trait_type": "Head"
+              },
+              {
+                "value": "Open",
+                "trait_type": "Eyes"
+              }
+            ],
+            "description": "Saga Monkes is an exclusive generative art collection airdropped to Saga Genesis Token holders. Learn more at https://SagaMonkes.com",
+            "name": "MONKE #5228",
+            "symbol": "MONKE",
+            "token_standard": "NonFungible"
+          },
+          "links": {
+            "image": "https://shdw-drive.genesysgo.net/9DEPA5HdWF9aWYuwWB6cpnT7exK7Cpw7WvDwx8qe9GqT/5228.png"
+          }
+        },
+        "authorities": [
+          {
+            "address": "4JdzLtiv96HEnpmpyN7ZdkupvZpZfSFRV6im7HUnsEXT",
+            "scopes": ["full"]
+          }
+        ],
+        "compression": {
+          "eligible": false,
+          "compressed": true,
+          "data_hash": "DGzE8c4RB1XQRbsKC79wiUJsghjvnvgeVZCgqFxxYs25",
+          "creator_hash": "Ep5RkW26Mcyk4njkeL3mnH3EUHoaPktuSYWJajMnSCoR",
+          "asset_hash": "FFFTQuoQDAy4h39PKQYBgk2Fj9NVhAheYJL6d9fa7G9E",
+          "tree": "2uH9TkmYkAKGrK7EPnd4Y7JVYswpQ2aED9deMn8QoYVy",
+          "seq": 14118,
+          "leaf_id": 5197
+        },
+        "grouping": [
+          {
+            "group_key": "collection",
+            "group_value": "GokAiStXz2Kqbxwz2oqzfEXuUhE7aXySmBGEP7uejKXF"
+          }
+        ],
+        "royalty": {
+          "royalty_model": "creators",
+          "target": null,
+          "percent": 0.069,
+          "basis_points": 690,
+          "primary_sale_happened": false,
+          "locked": false
+        },
+        "creators": [
+          {
+            "address": "8McVhmNjsYSkwQ34QXJb2ADgLWERcHcpqxSzRZUCRZfQ",
+            "share": 40,
+            "verified": false
+          },
+          {
+            "address": "niFtyPVUnA4dd3gaoajiwmX1keTsTi4k626szinHE5Z",
+            "share": 40,
+            "verified": false
+          },
+          {
+            "address": "KRTv1iR6dH7FuPoW51BQ9hU9UTtibYwZTEA3Fjg4RYy",
+            "share": 15,
+            "verified": false
+          },
+          {
+            "address": "6jYqTEtDgkr1v4DtU4QDUmg1cAf4o1GSsQDGt9X8EfPG",
+            "share": 5,
+            "verified": false
+          }
+        ],
+        "ownership": {
+          "frozen": false,
+          "delegated": false,
+          "delegate": null,
+          "ownership_model": "single",
+          "owner": "4igasQmVdH7kG9PZKEr9PUuuwpTxW1qJV1LV2rdpHRw8"
+        },
+        "supply": {
+          "print_max_supply": 0,
+          "print_current_supply": 0,
+          "edition_nonce": 0
+        },
+        "mutable": true,
+        "burnt": false
+      }
+    ]
+  },
+  "id": "my-id"
+}

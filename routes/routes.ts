@@ -11,12 +11,19 @@ import {
   type LeaderBoardLastUpdated,
   type BirdeyeTokenPriceData,
   type BirdeyeTokenPriceLastUpdated,
+  type NFTOwnership,
 } from "../models/models";
 
-import { MAX_POINTS, PROJECTS_TO_PLAY } from "../utils/constants";
+import {
+  MAX_POINTS,
+  NFTGatedTokens,
+  PROJECTS_TO_PLAY,
+} from "../utils/constants";
 import {
   calculateResult,
   fetchBirdeyeTokenPriceFallback,
+  insertToNFTOwnership,
+  searchAndVerifyNFTAsset,
 } from "../utils/helpers";
 
 export const handlePoolConfigRoute = async (): Promise<Response> => {
@@ -157,15 +164,18 @@ export const handlePostCreatePosition = async (
     }
 
     const depositsCollection = await db.collection<Deposits>("deposits");
-    const entryExists = await depositsCollection.findOne({
+    const deposits = await depositsCollection.findOne({
       pubkey,
       poolId,
     });
-    if (!entryExists) {
-      return Response.json(
-        { error: "No deposit found , cant create position if not deposited" },
-        { status: 404 }
-      );
+    const nftOwnershipCollection = await db.collection<NFTOwnership>(
+      "nftOwnership"
+    );
+    const nftOwnership = await nftOwnershipCollection.findOne({
+      owner: pubkey,
+    });
+    if (!deposits && !nftOwnership) {
+      return Response.json({ error: "not allowed to play" }, { status: 200 });
     }
 
     const pointsCollection = await db.collection<Points>("points");
@@ -419,8 +429,38 @@ export const handleIsAllowedToPlay = async (pubkey: string, poolId: string) => {
       pubkey,
       poolId,
     });
-    if (!deposits) {
-      return Response.json({ data: false }, { status: 200 });
+    const nftOwnershipCollection = await db.collection<NFTOwnership>(
+      "nftOwnership"
+    );
+    const nftOwnership = await nftOwnershipCollection.findOne({
+      owner: pubkey,
+    });
+    if (!deposits && !nftOwnership) {
+      return Response.json({ error: "not allowed to play" }, { status: 200 });
+    }
+    if (deposits) {
+      return Response.json(
+        {
+          data: {
+            method: "deposit",
+            verified: true,
+          },
+        },
+        { status: 200 }
+      );
+    }
+    if (nftOwnership) {
+      return Response.json(
+        {
+          data: {
+            method: "nft",
+            verified: true,
+            nftSymbol: nftOwnership.nftSymbol,
+            name: nftOwnership.nftName,
+          },
+        },
+        { status: 200 }
+      );
     }
     return Response.json({ data: true }, { status: 200 });
   } catch (e) {
@@ -631,5 +671,91 @@ export const handleGetBirdeyeTokenPriceLastUpdated = async () => {
     return Response.json({ data: tokenPriceLastUpdated }, { status: 200 });
   } catch (e) {
     return Response.json({ error: "Error in getting prices" }, { status: 500 });
+  }
+};
+
+export const handleVerifyNFTOwnership = async (
+  owner: string,
+  collectionAddress: string
+) => {
+  try {
+    const validOwnerPubkey = PublicKey.isOnCurve(owner);
+    const validCollectionAddress = PublicKey.isOnCurve(collectionAddress);
+    if (!validOwnerPubkey || !validCollectionAddress) {
+      return Response.json({ error: "Invalid pubkey" }, { status: 400 });
+    }
+    const nftOwnershipCollection = await db.collection<NFTOwnership>(
+      "nftOwnership"
+    );
+    const nftOwnership = await nftOwnershipCollection.findOne({
+      owner,
+      nftCollectionAddress: collectionAddress,
+    });
+    if (nftOwnership) {
+      return Response.json({ error: "NFT already verified" }, { status: 200 });
+    }
+    const verifyResult = await searchAndVerifyNFTAsset(
+      owner,
+      collectionAddress
+    );
+
+    if (verifyResult) {
+      const searchedNFT = NFTGatedTokens.find(
+        (nft) => nft.collectionAddress === collectionAddress
+      );
+
+      if (!searchedNFT) {
+        return Response.json(
+          { error: "NFT could not be verified" },
+          { status: 200 }
+        );
+      }
+      await insertToNFTOwnership(
+        owner,
+        collectionAddress,
+        searchedNFT.symbol,
+        searchedNFT.name
+      );
+      return Response.json({ data: "NFT verified" }, { status: 200 });
+    }
+    return Response.json(
+      { error: "NFT could not be verified" },
+      { status: 200 }
+    );
+  } catch (e) {
+    return Response.json(
+      { error: "Error verifying nft ownership" },
+      { status: 500 }
+    );
+  }
+};
+
+export const handleGetVerifyNFTOwnership = async (
+  owner: string,
+  collectionAddress: string
+) => {
+  try {
+    const validOwnerPubkey = PublicKey.isOnCurve(owner);
+    const validCollectionAddress = PublicKey.isOnCurve(collectionAddress);
+    if (!validOwnerPubkey || !validCollectionAddress) {
+      return Response.json({ error: "Invalid pubkey" }, { status: 400 });
+    }
+
+    const nftOwnershipCollection = await db.collection<NFTOwnership>(
+      "nftOwnership"
+    );
+    const nftOwnership = await nftOwnershipCollection.findOne({
+      owner,
+      nftCollectionAddress: collectionAddress,
+    });
+    if (!nftOwnership) {
+      return Response.json({ error: "NFT not verified" }, { status: 200 });
+    }
+    return Response.json({ data: nftOwnership }, { status: 200 });
+  } catch (e) {
+    return Response.json(
+      { error: "Error getting verifying nft" },
+      { status: 500 }
+    );
   }
 };

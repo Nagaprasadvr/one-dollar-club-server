@@ -14,13 +14,14 @@ import {
   type LeaderBoardLastUpdated,
   type BirdeyeTokenPriceData,
   type BirdeyeTokenPriceLastUpdated,
+  type NFTOwnership,
 } from "../models/models";
 import {
   DEFAULT_COMPUTE_UNIT_PRICE_ML,
   DEFAULT_COMPUTE_UNITS_OFFSET,
   HELIUS_MAINNET_RPC_ENDPOINT,
+  NFTGatedTokens,
   PROJECTS_TO_PLAY,
-  TOKEN_GATED_NFTS_COLLECTION_PUBKEY_MAP,
 } from "./constants";
 import * as solana from "@solana/web3.js";
 import type { SDK } from "../sdk/sdk";
@@ -451,7 +452,17 @@ export const deleteLiveLeaderBoardData = async () => {
   }
 };
 
-export const searchNFTAssets = async (owner: string) => {
+export const searchAndVerifyNFTAsset = async (
+  owner: string,
+  nftCollectionAddress: string
+) => {
+  const searchedNFT = NFTGatedTokens.find(
+    (nft) => nft.collectionAddress === nftCollectionAddress
+  );
+
+  if (!searchedNFT) {
+    throw new Error("NFT Collection not supported");
+  }
   try {
     const response = await fetch(HELIUS_MAINNET_RPC_ENDPOINT, {
       method: "POST",
@@ -464,21 +475,30 @@ export const searchNFTAssets = async (owner: string) => {
         method: "searchAssets",
         params: {
           ownerAddress: owner,
-          grouping: [
-            "collection",
-            TOKEN_GATED_NFTS_COLLECTION_PUBKEY_MAP.map(
-              (collection) => collection.collectionAddress
-            ),
-          ],
+          grouping: ["collection", searchedNFT.collectionAddress],
           page: 1, // Starts at 1
           limit: 1,
         },
       }),
     });
-    const { result } = await response.json();
-    return result;
+    const responseJson = await response.json();
+
+    if (!responseJson?.result) return false;
+    const items = responseJson.result?.items;
+
+    if (items.length === 0) {
+      return false;
+    }
+    const firstResult = items[0];
+    const metadata = firstResult?.content?.metadata;
+
+    if (metadata?.symbol === searchedNFT.symbol) {
+      return true;
+    }
+    return false;
   } catch (e) {
     console.log(e);
+    return false;
   }
 };
 
@@ -652,7 +672,7 @@ export const sendAndConTxWithComputePriceAndRetry = async (
   try {
     return await expirationRetry(fn, retries);
   } catch (e) {
-    console.log("err", e);
+    console.log("error", e);
     return null;
   }
 };
@@ -749,5 +769,58 @@ export const storeBirdEyeTokenPriceData = async (
   } else {
     await birdeyeTokenPriceCollection.deleteMany({});
     await birdeyeTokenPriceCollection.insertMany(tokenPrices);
+  }
+};
+
+export const insertToNFTOwnership = async (
+  ownerAddress: string,
+  nftCollectionAddress: string,
+  nftSymbol: string,
+  nftName: string
+) => {
+  try {
+    const nftOwnershipCollection = await db.collection<NFTOwnership>(
+      "nftOwnership"
+    );
+    const nftOwnershipData = await nftOwnershipCollection.findOne({
+      owner: ownerAddress,
+    });
+    if (!nftOwnershipData) {
+      await nftOwnershipCollection.insertOne({
+        owner: ownerAddress,
+        nftCollectionAddress: nftCollectionAddress,
+        nftSymbol,
+        nftName,
+      });
+    } else {
+      await nftOwnershipCollection.updateOne(
+        { owner: ownerAddress },
+        {
+          $set: {
+            nftCollectionAddress: nftCollectionAddress,
+          },
+        }
+      );
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const getNFTOwnership = async (ownerAddress: string) => {
+  try {
+    const nftOwnershipCollection = await db.collection<NFTOwnership>(
+      "nftOwnership"
+    );
+    const nftOwnershipData = await nftOwnershipCollection.findOne({
+      owner: ownerAddress,
+    });
+    if (!nftOwnershipData) {
+      return null;
+    }
+    return nftOwnershipData;
+  } catch (e) {
+    console.log(e);
+    return null;
   }
 };

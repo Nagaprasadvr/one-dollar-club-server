@@ -16,7 +16,9 @@ export type Urls =
   | "/getLeaderBoardLastUpdated"
   | "/poolGamesPlayed"
   | "/getBirdeyeTokenPrices"
-  | "/getBirdeyeTokenPriceLastUpdated";
+  | "/getBirdeyeTokenPriceLastUpdated"
+  | "/verifyNFT"
+  | "/getVerifiedNFT";
 
 export type RequestMethods = "GET" | "POST" | "PUT" | "DELETE";
 
