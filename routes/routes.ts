@@ -692,7 +692,10 @@ export const handleVerifyNFTOwnership = async (
       nftCollectionAddress: collectionAddress,
     });
     if (nftOwnership) {
-      return Response.json({ error: "NFT already verified" }, { status: 200 });
+      return Response.json(
+        { message: "NFT already verified" },
+        { status: 200 }
+      );
     }
     const verifyResult = await searchAndVerifyNFTAsset(
       owner,
@@ -716,7 +719,7 @@ export const handleVerifyNFTOwnership = async (
         searchedNFT.symbol,
         searchedNFT.name
       );
-      return Response.json({ data: "NFT verified" }, { status: 200 });
+      return Response.json({ message: "NFT verified" }, { status: 200 });
     }
     return Response.json(
       { error: "NFT could not be verified" },

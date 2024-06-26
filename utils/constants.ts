@@ -95,5 +95,7 @@ export const NFTGatedTokens = [
     name: "Saga Monkes",
     symbol: "MONKE",
     collectionAddress: "GokAiStXz2Kqbxwz2oqzfEXuUhE7aXySmBGEP7uejKXF",
+    imageUrl:
+      "https://shdw-drive.genesysgo.net/9DEPA5HdWF9aWYuwWB6cpnT7exK7Cpw7WvDwx8qe9GqT/8983.png",
   },
 ];
