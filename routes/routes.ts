@@ -425,7 +425,7 @@ export const handleGetPositions = async (pubkey: string, poolId: string) => {
 export const handleIsAllowedToPlay = async (pubkey: string, poolId: string) => {
   try {
     const depositsCollection = await db.collection<Deposits>("deposits");
-    const deposits = await depositsCollection.findOne({
+    const deposit = await depositsCollection.findOne({
       pubkey,
       poolId,
     });
@@ -435,10 +435,24 @@ export const handleIsAllowedToPlay = async (pubkey: string, poolId: string) => {
     const nftOwnership = await nftOwnershipCollection.findOne({
       owner: pubkey,
     });
-    if (!deposits && !nftOwnership) {
+
+    if (!deposit && !nftOwnership) {
       return Response.json({ error: "not allowed to play" }, { status: 200 });
     }
-    if (deposits) {
+
+    const pointsCollection = await db.collection<Points>("points");
+    const points = await pointsCollection.findOne({ pubkey, poolId });
+    if (deposit || nftOwnership) {
+      if (!points) {
+        await pointsCollection.insertOne({
+          pubkey,
+          pointsRemaining: MAX_POINTS,
+          poolId,
+        });
+      }
+    }
+
+    if (deposit) {
       return Response.json(
         {
           data: {
