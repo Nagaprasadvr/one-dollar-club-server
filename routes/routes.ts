@@ -174,6 +174,7 @@ export const handlePostCreatePosition = async (
     );
     const nftOwnership = await nftOwnershipCollection.findOne({
       owner: pubkey,
+      poolId,
     });
     if (!deposits && !nftOwnership) {
       return Response.json({ error: "not allowed to play" }, { status: 200 });
@@ -257,18 +258,26 @@ export const handlePostCreatePositions = async (
     const validPositions: Position[] = [];
     const totalPointsAllocated: number[] = [];
     const depositsCollection = await db.collection<Deposits>("deposits");
-    const entryExists = await depositsCollection.findOne({
+    const deposit = await depositsCollection.findOne({
       pubkey,
       poolId,
     });
-    if (!entryExists) {
+    const nftOwnershipCollection = await db.collection<NFTOwnership>(
+      "nftOwnership"
+    );
+    const nftOwnership = await nftOwnershipCollection.findOne({
+      owner: pubkey,
+      poolId,
+    });
+    if (!nftOwnership && !deposit) {
       return Response.json(
         {
-          error: "No deposit found , cant create position if not deposited",
+          error: "No deposit or verified nft found, can't create position",
         },
         { status: 404 }
       );
     }
+
     const pointsCollection = await db.collection<Points>("points");
     const points = await pointsCollection.findOne({
       pubkey,
