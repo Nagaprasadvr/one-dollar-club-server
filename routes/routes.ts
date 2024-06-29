@@ -693,11 +693,6 @@ export const handleVerifyNFTOwnership = async (
   poolId: string
 ) => {
   try {
-    const validOwnerPubkey = PublicKey.isOnCurve(owner);
-    const validCollectionAddress = PublicKey.isOnCurve(collectionAddress);
-    if (!validOwnerPubkey || !validCollectionAddress) {
-      return Response.json({ error: "Invalid pubkey" }, { status: 400 });
-    }
     const nftOwnershipCollection = await db.collection<NFTOwnership>(
       "nftOwnership"
     );
@@ -715,7 +710,6 @@ export const handleVerifyNFTOwnership = async (
       owner,
       collectionAddress
     );
-
     if (verifyResult) {
       const searchedNFT = NFTGatedTokens.find(
         (nft) => nft.collectionAddress === collectionAddress
@@ -802,12 +796,6 @@ export const handleGetNFTPoints = async (poolId: string) => {
       return Response.json({ message: "No data found" }, { status: 200 });
     }
 
-    const positionCollection = await db.collection<Position>("position");
-    const positions = await positionCollection.find({ poolId }).toArray();
-    if (positions.length === 0) {
-      return Response.json({ message: "No positions found" }, { status: 200 });
-    }
-
     let nftPoints: NFTPoints[] = [];
 
     for (const nft of NFTGatedTokens) {
@@ -826,9 +814,10 @@ export const handleGetNFTPoints = async (poolId: string) => {
         top3Positions: string;
       }[] = [];
       for (const player of nftOwnerships) {
-        const playerPositions = positions.filter(
-          (position) => position.pubkey === player.owner
-        );
+        const positionCollection = await db.collection<Position>("position");
+        const playerPositions = await positionCollection
+          .find({ poolId, pubkey: player.owner })
+          .toArray();
 
         if (playerPositions.length === 0) continue;
         const currentPrice = tokenPrice.find(
@@ -878,11 +867,8 @@ export const handleGetNFTPoints = async (poolId: string) => {
       const topGainer =
         playerPoints.sort((a, b) => b.points - a.points)[0]?.player ?? "";
 
-      const top3Positions = playerPoints
-        .sort((a, b) => b.points - a.points)
-        .slice(0, 3)
-        .map((player) => player.player)
-        .join(",");
+      const top3Positions = playerPoints.sort((a, b) => b.points - a.points)[0]
+        .top3Positions;
 
       nftPoints.push({
         nftName: nft.name,
