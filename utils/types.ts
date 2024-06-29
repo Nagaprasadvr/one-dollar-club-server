@@ -41,4 +41,5 @@ export type NFTPoints = {
   collectionAddress: string;
   top3Positions: string;
   nftUrl: string;
+  totalPlayers: number;
 };

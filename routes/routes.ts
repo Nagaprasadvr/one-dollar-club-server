@@ -878,6 +878,7 @@ export const handleGetNFTPoints = async (poolId: string) => {
         collectionAddress: nft.collectionAddress,
         top3Positions: top3Positions,
         nftUrl: nft.imageUrl,
+        totalPlayers: playerPoints.length,
       });
     }
 
