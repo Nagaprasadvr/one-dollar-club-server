@@ -103,6 +103,6 @@ export const NFTGatedTokens = [
     symbol: "SAGAGEN",
     collectionAddress: "Aprj5bdWrgNNpk3uUbvqWfu3CrE27LmpnXaE4X3SyjMb",
     imageUrl:
-      "https://api.underdog-data.com/jsondata/46pcSL5gmjBrPqGKFaLbbCmR6iVuLJbnQy13hAe7s6CC",
+      "https://api.underdog-data.com/imgdata/46pcSL5gmjBrPqGKFaLbbCmR6iVuLJbnQy13hAe7s6CC",
   },
 ];

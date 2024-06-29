@@ -776,7 +776,8 @@ export const insertToNFTOwnership = async (
   ownerAddress: string,
   nftCollectionAddress: string,
   nftSymbol: string,
-  nftName: string
+  nftName: string,
+  poolId: string
 ) => {
   try {
     const nftOwnershipCollection = await db.collection<NFTOwnership>(
@@ -791,6 +792,7 @@ export const insertToNFTOwnership = async (
         nftCollectionAddress: nftCollectionAddress,
         nftSymbol,
         nftName,
+        poolId,
       });
     } else {
       await nftOwnershipCollection.updateOne(

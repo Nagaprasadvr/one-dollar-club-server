@@ -44,6 +44,7 @@ import {
   hanldeGetBirdeyeTokenPrices,
   handleGetVerifyNFTOwnership,
   handleVerifyNFTOwnership,
+  handleGetNFTPoints,
 } from "./routes/routes";
 
 dotenv.config({
@@ -71,6 +72,7 @@ const urls: Urls[] = [
   "/getBirdeyeTokenPriceLastUpdated",
   "/verifyNFT",
   "/getVerifiedNFT",
+  "/getNFTPoints",
 ];
 
 const CORS_HEADERS = {
@@ -432,7 +434,11 @@ const handleRoutes = async (req: Request): Promise<Response> => {
       const nftCollectionAddress2 = queryParams?.nftCollectionAddress;
       return await handleGetVerifyNFTOwnership(
         String(nftOwner),
-        nftCollectionAddress2
+        nftCollectionAddress2,
+        poolId
       );
+
+    case "/getNFTPoints":
+      return await handleGetNFTPoints(poolId);
   }
 };

@@ -18,7 +18,8 @@ export type Urls =
   | "/getBirdeyeTokenPrices"
   | "/getBirdeyeTokenPriceLastUpdated"
   | "/verifyNFT"
-  | "/getVerifiedNFT";
+  | "/getVerifiedNFT"
+  | "/getNFTPoints";
 
 export type RequestMethods = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -30,4 +31,14 @@ export type Project = {
   name: string;
   mint: string;
   logoURI: string;
+};
+
+export type NFTPoints = {
+  nftName: string;
+  nftSymbol: string;
+  totalPoints: number;
+  topGainer: string;
+  collectionAddress: string;
+  top3Positions: string;
+  nftUrl: string;
 };

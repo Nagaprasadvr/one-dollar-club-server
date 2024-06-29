@@ -25,6 +25,7 @@ import {
   insertToNFTOwnership,
   searchAndVerifyNFTAsset,
 } from "../utils/helpers";
+import type { NFTPoints } from "../utils/types";
 
 export const handlePoolConfigRoute = async (): Promise<Response> => {
   const poolConfigCollection = await db.collection<PoolConfigAccount>(
@@ -434,22 +435,11 @@ export const handleIsAllowedToPlay = async (pubkey: string, poolId: string) => {
     );
     const nftOwnership = await nftOwnershipCollection.findOne({
       owner: pubkey,
+      poolId,
     });
 
     if (!deposit && !nftOwnership) {
       return Response.json({ error: "not allowed to play" }, { status: 200 });
-    }
-
-    const pointsCollection = await db.collection<Points>("points");
-    const points = await pointsCollection.findOne({ pubkey, poolId });
-    if (deposit || nftOwnership) {
-      if (!points) {
-        await pointsCollection.insertOne({
-          pubkey,
-          pointsRemaining: MAX_POINTS,
-          poolId,
-        });
-      }
     }
 
     if (deposit) {
@@ -732,7 +722,8 @@ export const handleVerifyNFTOwnership = async (
         owner,
         collectionAddress,
         searchedNFT.symbol,
-        searchedNFT.name
+        searchedNFT.name,
+        poolId
       );
       const pointsCollection = await db.collection<Points>("points");
       await pointsCollection.insertOne({
@@ -756,7 +747,8 @@ export const handleVerifyNFTOwnership = async (
 
 export const handleGetVerifyNFTOwnership = async (
   owner: string,
-  collectionAddress: string
+  collectionAddress: string,
+  poolId: string
 ) => {
   try {
     const validOwnerPubkey = PublicKey.isOnCurve(owner);
@@ -771,6 +763,7 @@ export const handleGetVerifyNFTOwnership = async (
     const nftOwnership = await nftOwnershipCollection.findOne({
       owner,
       nftCollectionAddress: collectionAddress,
+      poolId,
     });
     if (!nftOwnership) {
       return Response.json({ error: "NFT not verified" }, { status: 200 });
@@ -779,6 +772,124 @@ export const handleGetVerifyNFTOwnership = async (
   } catch (e) {
     return Response.json(
       { error: "Error getting verifying nft" },
+      { status: 500 }
+    );
+  }
+};
+
+export const handleGetNFTPoints = async (poolId: string) => {
+  try {
+    const nftOwnershipCollection = await db.collection<NFTOwnership>(
+      "nftOwnership"
+    );
+    const nftOwnerships = await nftOwnershipCollection
+      .find({ poolId })
+      .toArray();
+
+    const projectsToPlay = PROJECTS_TO_PLAY.map((project) => project.mint);
+
+    const tokenPrice = await fetchBirdeyeTokenPriceFallback(projectsToPlay);
+    if (nftOwnerships.length === 0) {
+      return Response.json({ message: "No data found" }, { status: 200 });
+    }
+
+    const positionCollection = await db.collection<Position>("position");
+    const positions = await positionCollection.find({ poolId }).toArray();
+    if (positions.length === 0) {
+      return Response.json({ message: "No positions found" }, { status: 200 });
+    }
+
+    let nftPoints: NFTPoints[] = [];
+
+    for (const nft of NFTGatedTokens) {
+      let totalNftPoints = 0;
+      const nftOwnerships = await nftOwnershipCollection
+        .find({ nftCollectionAddress: nft.collectionAddress })
+        .toArray();
+      if (nftOwnerships.length === 0) {
+        continue;
+      }
+
+      const playerPoints: {
+        player: string;
+        points: number;
+        collectionAddress: string;
+        top3Positions: string;
+      }[] = [];
+      for (const player of nftOwnerships) {
+        const playerPositions = positions.filter(
+          (position) => position.pubkey === player.owner
+        );
+
+        if (playerPositions.length === 0) continue;
+        const currentPrice = tokenPrice.find(
+          (price) => price.address === playerPositions[0].tokenMint
+        );
+        if (!currentPrice) {
+          return Response.json({ error: "No price found" }, { status: 404 });
+        }
+        let totalPoints = 0;
+        const resultingPositions: {
+          tokenName: string;
+          resultingPoints: number;
+        }[] = [];
+        for (const position of playerPositions) {
+          const finalPoints = calculateResult({
+            entryPrice: position.entryPrice,
+            leverage: position.leverage,
+            liquidationPrice: position.liquidationPrice,
+            positionType: position.positionType,
+            currentPrice: currentPrice.value,
+            pointsAllocated: position.pointsAllocated,
+          });
+          totalPoints += finalPoints;
+          resultingPositions.push({
+            tokenName: position.tokenName,
+            resultingPoints: finalPoints,
+          });
+        }
+        totalNftPoints += totalPoints;
+        const top3Positions = resultingPositions
+          .sort((a, b) => b.resultingPoints - a.resultingPoints)
+          .slice(0, 3)
+          .map((position) => position.tokenName)
+          .join(",");
+        playerPoints.push({
+          player: player.owner,
+          points: totalPoints,
+          collectionAddress: nft.collectionAddress,
+          top3Positions,
+        });
+      }
+
+      if (playerPoints.length === 0) {
+        continue;
+      }
+
+      const topGainer =
+        playerPoints.sort((a, b) => b.points - a.points)[0]?.player ?? "";
+
+      const top3Positions = playerPoints
+        .sort((a, b) => b.points - a.points)
+        .slice(0, 3)
+        .map((player) => player.player)
+        .join(",");
+
+      nftPoints.push({
+        nftName: nft.name,
+        nftSymbol: nft.symbol,
+        totalPoints: totalNftPoints,
+        topGainer: topGainer,
+        collectionAddress: nft.collectionAddress,
+        top3Positions: top3Positions,
+        nftUrl: nft.imageUrl,
+      });
+    }
+
+    return Response.json({ data: nftPoints }, { status: 200 });
+  } catch (e) {
+    return Response.json(
+      { error: "Error in getting nft points" },
       { status: 500 }
     );
   }

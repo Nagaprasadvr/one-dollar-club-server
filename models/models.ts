@@ -72,6 +72,7 @@ export type NFTOwnership = {
   nftCollectionAddress: string;
   nftSymbol: string;
   nftName: string;
+  poolId: string;
 };
 
 export type BirdeyeTokenPriceData = {
